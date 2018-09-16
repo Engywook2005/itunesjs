@@ -1,0 +1,28 @@
+{
+  "name": "itunes.js",
+  "version": "1.0.0",
+  "description": "Ensures that the same artist plays no more than one time per specified interval",
+  "main": "index.js",
+  "author": "<greg.thorson@sheknows.com>",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-jest": "^22.4.1",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^4.0.1",
+    "gulp-strip-comments": "^2.5.2",
+    "gulp-uglify": "^3.0.0",
+    "jest": "^22.4.2",
+    "madge": "^3.2.0",
+    "uglifyjs-webpack-plugin": "^1.1.6",
+    "webpack": "^3.10.0",
+    "webpack-merge": "^4.1.1"
+  },
+  "dependencies": {
+    "playback": "0.2.0"
+  }
+}

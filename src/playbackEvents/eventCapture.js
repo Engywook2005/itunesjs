@@ -1,6 +1,6 @@
 const itunes = require('playback');
 
-export default class EventCapture {
+class EventCapture {
 
     constructor(trackChangeCallback) {
         this.trackChangeCallback = trackChangeCallback;
@@ -9,14 +9,14 @@ export default class EventCapture {
     }
 
     init() {
-        listenForTrackChange();
+        this.listenForTrackChange();
     }
 
     listenForTrackChange() {
         const that = this;
 
         const trackChangeCallback = function(trackPlaying) {
-            if(that.currentTrack && that.currentTrack !== trackPlaying) {
+            if(JSON.stringify(that.currentTrack) !== JSON.stringify(trackPlaying)) {
                 that.lastTrack = that.currentTrack;
                 that.currentTrack = trackPlaying;
                 that.trackChangeCallback(trackPlaying);
@@ -24,7 +24,9 @@ export default class EventCapture {
         }
 
         // @TODO ideally there's a way to get track change without listening for the next track playing.
-        itunes.on('playing', trackChangeCallbackl);
+        itunes.on('playing', trackChangeCallback);
 
     }
 }
+
+module.exports.EventCapture = EventCapture;

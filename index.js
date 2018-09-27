@@ -4,7 +4,6 @@ const trackChangeCallback = function(trackData) {
     artistRecord.loadArtistHistory(function(caller) {
         caller.updateArtist(trackData.artist, new Date().getTime());
         caller.finalizeArtistHistory();    
-        console.log(caller);
     });
     // @TODO move to util func
     console.log(trackData);

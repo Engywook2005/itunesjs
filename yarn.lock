@@ -159,6 +159,10 @@ append-transform@^1.0.0:
   dependencies:
     default-require-extensions "^2.0.0"
 
+applescript@~0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/applescript/-/applescript-0.2.1.tgz#cbedbc5399006b0151cfdbbef560bfb491a4960e"
+
 aproba@^1.0.3, aproba@^1.1.1:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/aproba/-/aproba-1.2.0.tgz#6802e6264efd18c790a1b0d517f0f2627bf2c94a"
@@ -2279,6 +2283,10 @@ fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
 
+fs@^0.0.1-security:
+  version "0.0.1-security"
+  resolved "https://registry.yarnpkg.com/fs/-/fs-0.0.1-security.tgz#8a7bd37186b6dddf3813f23858b57ecaaf5e41d4"
+
 fsevents@^1.2.2, fsevents@^1.2.3:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-1.2.4.tgz#f41dcb1af2582af3692da36fc55cbd8e1041c426"
@@ -3165,6 +3173,12 @@ istanbul-reports@^1.3.0:
   resolved "https://registry.yarnpkg.com/istanbul-reports/-/istanbul-reports-1.3.0.tgz#2f322e81e1d9520767597dca3c20a0cce89a3554"
   dependencies:
     handlebars "^4.0.3"
+
+itunescontrol@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/itunescontrol/-/itunescontrol-1.0.6.tgz#fe39f500b44d098ec6c303f73e609a639d7481e9"
+  dependencies:
+    applescript "~0.2.1"
 
 jest-changed-files@^22.2.0:
   version "22.4.3"

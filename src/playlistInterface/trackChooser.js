@@ -13,7 +13,8 @@ class TrackChooser {
         // expand-tilde may help here: https://www.npmjs.com/package/expand-tilde
         this.pathToLibary = "/Users/greg.thorson/Music/iTunes/iTunes\ Music\ Library.xml";
         this.stream = null;
-        this.songIDs = [];
+        this.constructedPlaylist = {};
+        this.allTracks = {};
     };
 
     readLibraryToJSON() {
@@ -21,11 +22,12 @@ class TrackChooser {
         parser.on("playlist", function(playlist) {
             // @TODO - make configurable
             if(playlist.Name === 'masterplaylist') {
-                //console.log(playlist["Playlist Items"]);
                 for(let i = 0; i < playlist["Playlist Items"].length; i++) {
-                    //console.log(playlist["Playlist Items"][i]);
-                    this.songIDs.push(playlist["Playlist Items"][i]["Track ID"]);   
+                    const newTrackRecord = {},
+                        trackID = playlist["Playlist Items"][i]["Track ID"];
+                    this.constructedPlaylist[trackID] = newTrackRecord;
                 }
+                //console.log(this.constructedPlaylist);
             };            
         }.bind(this));
 

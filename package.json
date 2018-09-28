@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "fs": "^0.0.1-security",
+    "itunes-data": "^0.1.4",
     "itunescontrol": "^1.0.6",
     "playback": "0.2.0"
   }

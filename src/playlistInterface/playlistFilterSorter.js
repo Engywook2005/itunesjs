@@ -17,32 +17,32 @@ class PlaylistFilterSorter {
             // @TODO make configurable
             const numberOnShortList = 25;
 
-            // Filters by number of stars. The more I like a track, the more recently played the track is allowd.
+            // Then filter by number of stars vs how long since played
+            // @TODO - configurable how long to wait depending on number of starts
             refinedPlaylist = this.filterByStars(refinedPlaylist);
 
-            // Order by playcount.
-            refinedPlaylist = this.sortByPlaycount(refinedPlaylist);
+            // Then sort what's left by number of plays, in ascending order. Take the first 25.
+            // @TODO - configurable how many tracks to take. The reason for doing this is a little hard to explain.
+            refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'Play Count');
 
             if(refinedPlaylist.length > numberOnShortList) {
-                refinedPlaylist = refinedPlaylist.splice(0, 25);
+                refinedPlaylist = refinedPlaylist.splice(0, numberOnShortList);
             }
+
+            // Finally sort by last play date. In this case we do not need to worry about changing apple time to unix epoch
+            refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'Play Date');
 
             console.log(JSON.stringify(refinedPlaylist));
 
-        }.bind(this);
+            //@TODO complete promise. But for now...
 
-        this.filterRecentArtists(playList, recentArtistCallback);
+            process.exit();
+
+        }.bind(this);
 
         // Filter by artists recently played - that will shorten this list the most
         // @TODO - configurable how long to wait to play the same artist again
-
-        // Then filter by number of stars vs how long since played
-        // @TODO - configurable how long to wait depending on number of starts
-
-        // Then sort what's left by number of plays, in ascending order. Take the first 25.
-        // @TODO - configurable how many tracks to take. The reason for doing this is a little hard to explain.
-
-        // Then sort by most recently played
+        this.filterRecentArtists(playList, recentArtistCallback);
 
         // Sorted callback with result.
         return playList;
@@ -93,10 +93,10 @@ class PlaylistFilterSorter {
         return playListArray;
     }
 
-    sortByPlaycount(playListArray) {
+    sortPlaylist(playListArray, prop) {
         playListArray = playListArray.sort(function(itemA, itemB) {
-            const itemAPlayCount = itemA['Play Count'],
-                itemBPlayCount = itemB['Play Count'];
+            const itemAPlayCount = itemA[prop],
+                itemBPlayCount = itemB[prop];
 
             // Played fewer times? Bring to the front.
             if(itemAPlayCount < itemBPlayCount) {

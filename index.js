@@ -15,7 +15,7 @@ const trackChangeCallback = function(trackData) {
 };
 
 const getNextTrackStack = function() {
-    
+
     const parseCallback = function(playlist, err) {
         // Filter and sort playlist.
         const playlistFilterSorter = new UberPlaylistManager.PlaylistFilterSorter();
@@ -39,6 +39,7 @@ const getFirstTrackStack = function() {
 
 // @TODO call this function on src/index.js as an IIFE
 (function() {
+
     //console.log(UberPlaylistManager.EventCapture);
     const eventCapture = new UberPlaylistManager.EventCapture(trackChangeCallback);
 

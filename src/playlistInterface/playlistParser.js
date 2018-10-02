@@ -4,9 +4,7 @@ const fs = require('fs'),
 
 
 class PlaylistParser {
-    // @TODO will need to pass a callback function. At least one for when a track is chosen, perhaps another for when
-    // they've all been sorted.
-    constructor() {
+    constructor(playlistParsedCallback) {
         this.itunesLibrary = {};
         // @TODO this will need to be configurable. Also, pass as argument?
         // @TODO ugh this has to be full path, no ~ allowed?
@@ -16,6 +14,7 @@ class PlaylistParser {
         this.constructedPlaylist = {};
         this.itemsFilled = 0;
         this.playlistLength = 0;
+        this.playlistParsedCallback = playlistParsedCallback;
     };
 
     // @TODO should make this shoot a callback - perhaps with the constructedPlaylist object?
@@ -55,13 +54,10 @@ class PlaylistParser {
 
         // If we have a playlist, and it's been filled, it's go-time.
         if(this.playlistLength > 0 && this.itemsFilled === this.playlistLength) {
-            // @TODO make callback here
-            console.log(JSON.stringify(this.constructedPlaylist));
+            // @TODO make callback here - this will really need to be able to take an error condition as well
+            this.playlistParsedCallback(this.constructedPlaylist, null); 
         }
     }
 }
 
-const playlistParser = new PlaylistParser();
-
-//@TODO remove!!!
-playlistParser.readLibraryToJSON();
+module.exports.PlaylistParser = PlaylistParser;

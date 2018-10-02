@@ -18,8 +18,6 @@ const getNextTrackStack = function() {
     
     const parseCallback = function(playlist, err) {
         // Filter and sort playlist.
-        console.log('received callback');
-
         const playlistFilterSorter = new UberPlaylistManager.PlaylistFilterSorter();
 
         playlistFilterSorter.runSort(playlist);

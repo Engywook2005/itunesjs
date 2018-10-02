@@ -11,8 +11,23 @@ class PlaylistFilterSorter {
         const recentArtistCallback = function(refinedPlaylist, err) {
             // refinedPlaylist is a simple array @TODO why not an array to begin with? Starting with an object is easier to work with though...
             // in any case I don't think theres any need to store this as an object from here on out.
+
+            // After sorting by playcount, how long an array to sort by last played and ultimately return? 
+            // Limiting adds a bit more variety in what's played
+            // @TODO make configurable
+            const numberOnShortList = 25;
+
+            // Filters by number of stars. The more I like a track, the more recently played the track is allowd.
             refinedPlaylist = this.filterByStars(refinedPlaylist);
-            console.log(refinedPlaylist);
+
+            // Order by playcount.
+            refinedPlaylist = this.sortByPlaycount(refinedPlaylist);
+
+            if(refinedPlaylist.length > numberOnShortList) {
+                refinedPlaylist = refinedPlaylist.splice(0, 25);
+            }
+
+            console.log(JSON.stringify(refinedPlaylist));
 
         }.bind(this);
 
@@ -73,6 +88,26 @@ class PlaylistFilterSorter {
                 const lastPlay = appleTimeStampToUnixEpoch(playlistItem['Play Date']);     
 
                 return new Date().getTime() - lastPlay > minimumWait;
+        });
+
+        return playListArray;
+    }
+
+    sortByPlaycount(playListArray) {
+        playListArray = playListArray.sort(function(itemA, itemB) {
+            const itemAPlayCount = itemA['Play Count'],
+                itemBPlayCount = itemB['Play Count'];
+
+            // Played fewer times? Bring to the front.
+            if(itemAPlayCount < itemBPlayCount) {
+                return -1;
+            }
+
+            if(itemAPlayCount > itemBPlayCount) {
+                return 1;
+            }
+
+            return 0;
         });
 
         return playListArray;

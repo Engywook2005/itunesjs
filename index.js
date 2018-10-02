@@ -15,26 +15,30 @@ const trackChangeCallback = function(trackData) {
 };
 
 const getNextTrackStack = function() {
+    return new Promise(function(resolve, reject) {
+        const parseCallback = function(playlist, err) {
 
-    const parseCallback = function(playlist, err) {
-        // Filter and sort playlist.
-        const playlistFilterSorter = new UberPlaylistManager.PlaylistFilterSorter();
-
-        playlistFilterSorter.runSort(playlist);
-
-    };
-
-    const playlistParser = new UberPlaylistManager.PlaylistParser(parseCallback);  
-    playlistParser.readLibraryToJSON();
-
-    // @TODO this is a place where it would be sensible to use a promise.
-    return false;
+            // Filter and sort playlist.
+            const playlistFilterSorter = new UberPlaylistManager.PlaylistFilterSorter();
+    
+            playlistFilterSorter.runSort(playlist).then(function(data) {
+                resolve(data);
+            });
+    
+        };
+    
+        const playlistParser = new UberPlaylistManager.PlaylistParser(parseCallback);  
+        playlistParser.readLibraryToJSON();
+    });
 };
 
 const getFirstTrackStack = function() {
-    const trackStack = getNextTrackStack();
-    // @TODO add first two to temporary playlist
-    // @TODO start playing the playlist
+    getNextTrackStack().then(function(data) {
+        console.log(JSON.stringify(data));
+        process.exit();
+        ///@TODO add first two to temporary playlist
+        // @TODO start playing the playlist
+    });
 };
 
 // @TODO call this function on src/index.js as an IIFE

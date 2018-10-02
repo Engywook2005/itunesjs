@@ -8,44 +8,39 @@ class PlaylistFilterSorter {
 
     // @TODO this will also need to return a promise
     runSort(playList) {
-        const recentArtistCallback = function(refinedPlaylist, err) {
-            // refinedPlaylist is a simple array @TODO why not an array to begin with? Starting with an object is easier to work with though...
-            // in any case I don't think theres any need to store this as an object from here on out.
-
-            // After sorting by playcount, how long an array to sort by last played and ultimately return? 
-            // Limiting adds a bit more variety in what's played
-            // @TODO make configurable
-            const numberOnShortList = 25;
-
-            // Then filter by number of stars vs how long since played
-            // @TODO - configurable how long to wait depending on number of starts
-            refinedPlaylist = this.filterByStars(refinedPlaylist);
-
-            // Then sort what's left by number of plays, in ascending order. Take the first 25.
-            // @TODO - configurable how many tracks to take. The reason for doing this is a little hard to explain.
-            refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'Play Count');
-
-            if(refinedPlaylist.length > numberOnShortList) {
-                refinedPlaylist = refinedPlaylist.splice(0, numberOnShortList);
-            }
-
-            // Finally sort by last play date. In this case we do not need to worry about changing apple time to unix epoch
-            refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'Play Date');
-
-            console.log(JSON.stringify(refinedPlaylist));
-
-            //@TODO complete promise. But for now...
-
-            process.exit();
-
-        }.bind(this);
-
-        // Filter by artists recently played - that will shorten this list the most
-        // @TODO - configurable how long to wait to play the same artist again
-        this.filterRecentArtists(playList, recentArtistCallback);
-
-        // Sorted callback with result.
-        return playList;
+        return new Promise(function(resolve, reject) {
+            const recentArtistCallback = function(refinedPlaylist, err) {
+                // refinedPlaylist is a simple array @TODO why not an array to begin with? Starting with an object is easier to work with though...
+                // in any case I don't think theres any need to store this as an object from here on out.
+    
+                // After sorting by playcount, how long an array to sort by last played and ultimately return? 
+                // Limiting adds a bit more variety in what's played
+                // @TODO make configurable
+                const numberOnShortList = 25;
+    
+                // Then filter by number of stars vs how long since played
+                // @TODO - configurable how long to wait depending on number of starts
+                refinedPlaylist = this.filterByStars(refinedPlaylist);
+    
+                // Then sort what's left by number of plays, in ascending order. Take the first 25.
+                // @TODO - configurable how many tracks to take. The reason for doing this is a little hard to explain.
+                refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'Play Count');
+    
+                if(refinedPlaylist.length > numberOnShortList) {
+                    refinedPlaylist = refinedPlaylist.splice(0, numberOnShortList);
+                }
+    
+                // Finally sort by last play date. In this case we do not need to worry about changing apple time to unix epoch
+                refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'Play Date');
+    
+                resolve(refinedPlaylist);
+    
+            }.bind(this);
+    
+            // Filter by artists recently played - that will shorten this list the most
+            // @TODO - configurable how long to wait to play the same artist again
+            this.filterRecentArtists(playList, recentArtistCallback);
+        }.bind(this));
     }
 
     filterByStars(playListArray) {     

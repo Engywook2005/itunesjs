@@ -1,3 +1,3 @@
-const EventCapture = require('./eventCapture').EventCapture;
+const EventCapture = require('./eventCapture').EventCapture
 
-module.exports.EventCapture = EventCapture;
+module.exports.EventCapture = EventCapture

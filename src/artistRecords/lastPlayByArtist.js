@@ -35,10 +35,12 @@ class LastPlayByArtist {
 
     // checks last play. If never played, -1. Otherwise the last time the artist played.
     checkArtistLastPlay(name) {
-        lastPlayed = -1;
+        let lastPlayed = -1;
         if(this.artistHistory[name]) {
-            return this.artistHistory[name].lastPlayed;
+            lastPlayed = this.artistHistory[name].lastPlayed;
         }
+
+        return lastPlayed;
     }
 }
 

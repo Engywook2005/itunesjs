@@ -57,7 +57,7 @@ class PlaylistParser {
       // @TODO I don't know why this is now stopping at one short. Race condition?
       if (this.playlistLength > 0 && this.itemsFilled >= this.playlistLength - 1) {
         // @TODO make callback here - this will really need to be able to take an error condition as well
-        this.playlistParsedCallback(this.constructedPlaylist, null)
+        this.playlistParsedCallback(null, this.constructedPlaylist)
       }
     }
   }

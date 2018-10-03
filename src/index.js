@@ -3,9 +3,55 @@ const LastPlayByArtist = require('./artistRecords').LastPlayByArtist;
 const PlaylistParser = require('./playlistInterface').PlaylistParser;
 const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter;
 
-// @TODO the actual executable should be here in src/index.js. The only thing in index.js should be an IIFE that calls a main function here.
+const trackChangeCallback = function(trackData) {
+    const artistRecord = new LastPlayByArtist();
+    artistRecord.loadArtistHistory(function(caller) {
+        // @TODO move to util function
+        caller.updateArtist(trackData.artist, new Date().getTime());
+        caller.finalizeArtistHistory();    
+    });
+    // @TODO call to get next stack of tracks
+    const nextTrackStack = getNextTrackStack();
+    // @TODO remove previous track and add next track nextTrackStack[0])
+    console.log(trackData);
+};
 
-module.exports.EventCapture = EventCapture;
-module.exports.LastPlayByArtist = LastPlayByArtist;
-module.exports.PlaylistParser = PlaylistParser;
-module.exports.PlaylistFilterSorter = PlaylistFilterSorter;
+const getNextTrackStack = function() {
+    return new Promise(function(resolve, reject) {
+        const parseCallback = function(playlist, err) {
+
+            // Filter and sort playlist.
+            const playlistFilterSorter = new PlaylistFilterSorter();
+    
+            playlistFilterSorter.runSort(playlist).then(function(data) {
+                resolve(data);
+            });
+    
+        };
+    
+        const playlistParser = new PlaylistParser(parseCallback);  
+        playlistParser.readLibraryToJSON();
+    });
+};
+
+const getFirstTrackStack = function() {
+    getNextTrackStack().then(function(data) {
+        console.log(JSON.stringify(data));
+        process.exit();
+        ///@TODO add first two to temporary playlist
+        // @TODO start playing the playlist
+    });
+};
+
+const init = function() {
+
+    const eventCapture = new EventCapture(trackChangeCallback);
+
+    // @TODO REINSTATE!!!
+    //eventCapture.init();
+
+    getFirstTrackStack();
+};
+
+
+module.exports.init = init;

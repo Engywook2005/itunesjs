@@ -1,3 +1,3 @@
-const LastPlayByArtist = require('./lastPlayByArtist').LastPlayByArtist;
+const LastPlayByArtist = require('./lastPlayByArtist').LastPlayByArtist
 
-module.exports.LastPlayByArtist = LastPlayByArtist;
+module.exports.LastPlayByArtist = LastPlayByArtist

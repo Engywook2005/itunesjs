@@ -1,57 +1,58 @@
-const EventCapture = require('./playbackEvents').EventCapture;
-const LastPlayByArtist = require('./artistRecords').LastPlayByArtist;
-const PlaylistParser = require('./playlistInterface').PlaylistParser;
-const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter;
+const EventCapture = require('./playbackEvents').EventCapture
+const LastPlayByArtist = require('./artistRecords').LastPlayByArtist
+const PlaylistParser = require('./playlistInterface').PlaylistParser
+const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter
 
-const trackChangeCallback = function(trackData) {
-    const artistRecord = new LastPlayByArtist();
-    artistRecord.loadArtistHistory(function(caller) {
-        // @TODO move to util function
-        caller.updateArtist(trackData.artist, new Date().getTime());
-        caller.finalizeArtistHistory();    
-    });
-    // @TODO call to get next stack of tracks
-    const nextTrackStack = getNextTrackStack();
-    // @TODO remove previous track and add next track nextTrackStack[0])
-    console.log(trackData);
-};
+const trackChangeCallback = function (trackData) {
+  const artistRecord = new LastPlayByArtist()
+  artistRecord.loadArtistHistory(function (err, caller) {
+    if (err) {
+      console.log(err)
+      process.exit()
+    }
+    // @TODO date/time move to util function
+    caller.updateArtist(trackData.artist, new Date().getTime())
+    caller.finalizeArtistHistory()
+  })
+  // @TODO call to get next stack of tracks - this may need to be in the callback for finalizeArtistHistory
+  // also should be in the form of a promise
+  const nextTrackStack = getNextTrackStack()
+  // @TODO remove previous track and add next track nextTrackStack[0])
+  console.log(trackData)
+}
 
-const getNextTrackStack = function() {
-    return new Promise(function(resolve, reject) {
-        const parseCallback = function(playlist, err) {
+const getNextTrackStack = function () {
+  return new Promise(function (resolve, reject) {
+    const parseCallback = function (playlist, err) {
+      // Filter and sort playlist.
+      const playlistFilterSorter = new PlaylistFilterSorter()
 
-            // Filter and sort playlist.
-            const playlistFilterSorter = new PlaylistFilterSorter();
-    
-            playlistFilterSorter.runSort(playlist).then(function(data) {
-                resolve(data);
-            });
-    
-        };
-    
-        const playlistParser = new PlaylistParser(parseCallback);  
-        playlistParser.readLibraryToJSON();
-    });
-};
+      playlistFilterSorter.runSort(playlist).then(function (data) {
+        resolve(data)
+      })
+    }
 
-const getFirstTrackStack = function() {
-    getNextTrackStack().then(function(data) {
-        console.log(JSON.stringify(data));
-        process.exit();
-        ///@TODO add first two to temporary playlist
-        // @TODO start playing the playlist
-    });
-};
+    const playlistParser = new PlaylistParser(parseCallback)
+    playlistParser.readLibraryToJSON()
+  })
+}
 
-const init = function() {
+const getFirstTrackStack = function () {
+  getNextTrackStack().then(function (data) {
+    console.log(JSON.stringify(data))
+    process.exit()
+    /// @TODO add first two to temporary playlist
+    // @TODO start playing the playlist
+  })
+}
 
-    const eventCapture = new EventCapture(trackChangeCallback);
+const init = function () {
+  const eventCapture = new EventCapture(trackChangeCallback)
 
-    // @TODO REINSTATE!!!
-    //eventCapture.init();
+  // @TODO REINSTATE!!!
+  // eventCapture.init();
 
-    getFirstTrackStack();
-};
+  getFirstTrackStack()
+}
 
-
-module.exports.init = init;
+module.exports.init = init

@@ -4,6 +4,9 @@ const itunesData = require('itunes-data')
 
 const parser = itunesData.parser()
 
+/**
+ * Parses itunes library and assembles selected master playlist as object.
+ */
 class PlaylistParser {
   constructor (playlistParsedCallback) {
     this.itunesLibrary = {}
@@ -18,7 +21,10 @@ class PlaylistParser {
     this.playlistParsedCallback = playlistParsedCallback
   };
 
-  // @TODO should make this shoot a callback - perhaps with the constructedPlaylist object?
+  /**
+   * Reads itunes library. Stores master playlist as an object. As tracks are received,
+   * they are added to the master playlist if the id's match.
+   */
   readLibraryToJSON () {
     let allTracks = {}
 
@@ -47,8 +53,14 @@ class PlaylistParser {
     this.stream.pipe(parser)
   }
 
-  // If we have a playlist, AND this track id is on the playlist, AND we have a matching track, bring them together.
+  /**
+   * Binds specific track objects to master playlist.
+   *
+   * @param {*} trackID
+   * @param {*} allTracks
+   */
   tryToAddTrackToPlaylist (trackID, allTracks) {
+    // If we have a playlist, AND this track id is on the playlist, AND we have a matching track, bring them together.
     if (this.constructedPlaylist[trackID] && allTracks[trackID]) {
       this.constructedPlaylist[trackID] = allTracks[trackID]
       this.itemsFilled++

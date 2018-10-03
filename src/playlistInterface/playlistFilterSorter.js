@@ -1,16 +1,24 @@
 const LastPlayByArtist = require('../artistRecords').LastPlayByArtist
 
+/**
+ * Uses config to filter and sort master playlist.
+ */
 class PlaylistFilterSorter {
   constructor (sortedCallback) {
     this.sortedCallback = sortedCallback
     this.lastPlayByArtist = new LastPlayByArtist()
   }
 
-  // @TODO this will also need to return a promise
+  /**
+   * Externally callable function to sort playlist.
+   *
+   * @param {*} playList
+   * @returns Promise
+   */
   runSort (playList) {
     return new Promise(function (resolve, reject) {
       const recentArtistCallback = function (refinedPlaylist, err) {
-        // refinedPlaylist is a simple array @TODO why not an array to begin with? Starting with an object is easier to work with though...
+        // refinedPlaylist is a simple array which will be filtered and sorted.
         // in any case I don't think theres any need to store this as an object from here on out.
 
         // After sorting by playcount, how long an array to sort by last played and ultimately return?
@@ -42,6 +50,13 @@ class PlaylistFilterSorter {
     }.bind(this))
   }
 
+  /**
+   * Removes tracks that have been played too recently, with the threshold determined by rating.
+   *
+   * @param {Array} playListArray
+   *
+   * @returns Array
+   */
   filterByStars (playListArray) {
     playListArray = playListArray.filter(function (playlistItem) {
       // @TODO also needs to be configurable
@@ -88,6 +103,14 @@ class PlaylistFilterSorter {
     return playListArray
   }
 
+  /**
+   * Generic sorting function for track objects.
+   *
+   * @param {Array} playListArray
+   * @param {String} prop
+   *
+   * @returns Array;
+   */
   sortPlaylist (playListArray, prop) {
     playListArray = playListArray.sort(function (itemA, itemB) {
       const itemAPlayCount = itemA[prop]
@@ -109,10 +132,18 @@ class PlaylistFilterSorter {
     return playListArray
   }
 
+  /**
+   * Removes tracks by artists that have been played within an amount of time specified in config.
+   * Returns an array because this is going to be a lot easier to filter and sort than an object
+   *
+   * @param {Object} playList
+   * @param {Function} callback
+   *
+   * @returns Array
+   */
   filterRecentArtists (playList, callback) {
     this.lastPlayByArtist.loadArtistHistory(function (caller) {
       // @TODO dontPlaywithinDays should be a config
-      // going to ordinary array because this is going to be a lot easier to filter and sort than an object
       const refinedPlaylist = []
 
       const dontPlayWithinDays = 1

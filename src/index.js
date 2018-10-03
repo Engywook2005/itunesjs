@@ -3,6 +3,12 @@ const LastPlayByArtist = require('./artistRecords').LastPlayByArtist
 const PlaylistParser = require('./playlistInterface').PlaylistParser
 const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter
 
+/**
+ * Called when a play event occurs. Checks to see if it is a different track from what has been
+ * playing. If it is, updates artist history and queues another track to the playlist.
+ *
+ * @param {*} trackData
+ */
 const trackChangeCallback = function (trackData) {
   const artistRecord = new LastPlayByArtist()
   artistRecord.loadArtistHistory(function (err, caller) {
@@ -21,6 +27,11 @@ const trackChangeCallback = function (trackData) {
   console.log(trackData)
 }
 
+/**
+ * Assembles next tracks to play in desired order.
+ *
+ * @returns Promise
+ */
 const getNextTrackStack = function () {
   return new Promise(function (resolve, reject) {
     const parseCallback = function (err, playlist) {
@@ -42,6 +53,10 @@ const getNextTrackStack = function () {
   })
 }
 
+/**
+ * Gets set of tracks to play, in order. Adds the first two tracks to temporary playlist.
+ * Starts playback on the temporary playlist.
+ */
 const getFirstTrackStack = function () {
   getNextTrackStack().then(function (data) {
     console.log(JSON.stringify(data))
@@ -50,13 +65,15 @@ const getFirstTrackStack = function () {
   })
 }
 
+/**
+ * Initializes playback event capture (listening for change in track).
+ *
+ */
 const init = function () {
   const eventCapture = new EventCapture(trackChangeCallback)
 
-  // @TODO REINSTATE!!!
   eventCapture.init()
 
-  // @TODO REINSTATE!!!
   getFirstTrackStack()
 }
 

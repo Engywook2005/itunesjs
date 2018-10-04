@@ -10,7 +10,8 @@ const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter
  * @param {*} trackData
  */
 const trackChangeCallback = function (trackData) {
-  const artistRecord = new LastPlayByArtist()
+  const artistRecord = new LastPlayByArtist();
+    
   artistRecord.loadArtistHistory(function (err, caller) {
     if (err) {
       console.log(err)
@@ -18,12 +19,23 @@ const trackChangeCallback = function (trackData) {
     }
     // @TODO date/time move to util function
     caller.updateArtist(trackData.artist, new Date().getTime())
-    caller.finalizeArtistHistory()
+    caller.finalizeArtistHistory(function (err, caller) {
+      if (err) {
+        console.log(err)
+        process.exit()
+      }
+
+      const playNextTrack = function() {
+        getNextTrackStack().then(function (data) {
+            console.log(JSON.stringify(data))
+            // @TODO remove previous track and add next track data[0])
+        })    
+      }
+        
+      // @TODO is it necessary to wait for the XML document to be rewritten?
+      setTimeout(playNextTrack, 1000);
+    })
   })
-  // @TODO call to get next stack of tracks - this may need to be in the callback for finalizeArtistHistory
-  // also should be in the form of a promise
-  // const nextTrackStack = getNextTrackStack()
-  // @TODO remove previous track and add next track nextTrackStack[0])
   console.log(trackData)
 }
 
@@ -60,7 +72,7 @@ const getNextTrackStack = function () {
 const getFirstTrackStack = function () {
   getNextTrackStack().then(function (data) {
     console.log(JSON.stringify(data))
-    /// @TODO add first two to temporary playlist
+    // @TODO add first two to temporary playlist
     // @TODO start playing the playlist
   })
 }

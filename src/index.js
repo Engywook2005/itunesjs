@@ -84,6 +84,7 @@ const getFirstTrackStack = function () {
 const init = function () {
   const eventCapture = new EventCapture(trackChangeCallback)
 
+  // @TODO this may need to be moved to after the first track is playing.
   eventCapture.init()
 
   getFirstTrackStack()

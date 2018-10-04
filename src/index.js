@@ -2,6 +2,7 @@ const EventCapture = require('./playbackEvents').EventCapture
 const LastPlayByArtist = require('./artistRecords').LastPlayByArtist
 const PlaylistParser = require('./playlistInterface').PlaylistParser
 const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter
+const Queueing = require('./playback').Queueing;
 
 /**
  * Called when a play event occurs. Checks to see if it is a different track from what has been
@@ -72,8 +73,11 @@ const getNextTrackStack = function () {
 const getFirstTrackStack = function () {
   getNextTrackStack().then(function (data) {
     console.log(JSON.stringify(data))
-    // @TODO add first two to temporary playlist
-    // @TODO start playing the playlist
+    const queueing = new Queueing(data);
+    queueing.addTrack();
+
+    // @TODO start playback
+    // then start the eventCapture
   })
 }
 
@@ -85,7 +89,7 @@ const init = function () {
   const eventCapture = new EventCapture(trackChangeCallback)
 
   // @TODO this may need to be moved to after the first track is playing.
-  eventCapture.init()
+  //eventCapture.init()
 
   getFirstTrackStack()
 }

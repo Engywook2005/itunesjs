@@ -1,10 +1,20 @@
 #!/usr/bin/env osascript -l JavaScript
 
-
+// .sh/addTrack.sh [stringified, then escaped object]
+const nameArtistAlbumString = $.NSProcessInfo.processInfo.arguments.objectAtIndex(4).js;
+    nameArtistAlbumObj = JSON.parse(unescape(nameArtistAlbumString));
+ 
 const iTunes = Application('iTunes');
 const knownPlaylists = iTunes.sources["Library"].userPlaylists;
-// @TODO need to make the track id settable by argument.
-const targetTrackName = "Is There Anybody Out There?";
+
+const trackName = nameArtistAlbumObj.name;
+const artist = nameArtistAlbumObj.artist;
+const album = nameArtistAlbumObj.album;
+
+console.log(trackName);
+console.log(artist);
+console.log(album);
+
 let tempPlaylist, trackToAdd;
 
 for(let prop in knownPlaylists) {
@@ -18,18 +28,13 @@ if(!tempPlaylist) {
   tempPlaylist.name = 'tempUber';  
 }
 
-//console.log(iTunes.sources["Library"].tracks[trackToAdd].name());
-
-//iTunes.sources["Library"].tracks.byId(trackToAdd).name();
-
 // @TODO no way this is the only way to do this
-// @TODO make this configurable as well
 const knownTracks = iTunes.sources["Library"].userPlaylists.byName('masterplaylist').tracks;
 
 for(let prop in knownTracks) {
     //console.log(prop + " " + knownTracks[prop].track_id());
     //console.log(prop + " " + knownTracks[prop].name() + " " + knownTracks[prop].artist() + " " + knownTracks[prop].album());
-    if(knownTracks[prop].name() === targetTrackName) {
+    if(knownTracks[prop].name() === trackName && knownTracks[prop].artist() === artist && knownTracks[prop].album() === album) {
         console.log('found it');
         trackToAdd = knownTracks[prop];
         break;
@@ -37,4 +42,3 @@ for(let prop in knownTracks) {
 }
 
 trackToAdd.duplicate({to:tempPlaylist});
-

@@ -1,3 +1,4 @@
+var spawn = require('child_process').spawn;
 
 class Queueing {
     constructor(trackStack) {
@@ -9,14 +10,9 @@ class Queueing {
 
     addTrack() {
         const nextTrack = this.trackStack.shift(),
-            nextTrackObj = {
-              "name": nextTrack.Name,
-              "album": nextTrack.Album,
-              "artist": nextTrack.Artist      
-            },
-            nextTrackArg = escape(JSON.stringify(nextTrackObj));
+            nextTrackID = nextTrack["Track ID"];
         
-        console.log(nextTrackArg);    
+        console.log(nextTrackID);    
     }
 }
 

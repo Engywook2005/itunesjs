@@ -1,5 +1,7 @@
 #!/usr/bin/env osascript -l JavaScript
 
+// Prefer not to go this direction because calling an external shell script is so ugly.
+
 const dbID = parseInt($.NSProcessInfo.processInfo.arguments.objectAtIndex(4).js);
  
 const iTunes = Application('iTunes');

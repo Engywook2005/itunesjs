@@ -68,6 +68,7 @@ class Queueing {
 
             return true;
         }); 
+
         execAddTrack(dbID, startPlayback).then(function(data) {
             console.log("response: " + data);
         }).catch(
@@ -81,5 +82,5 @@ class Queueing {
 module.exports.Queueing = Queueing;
 
 // @TODO test lines, remove
-const queueing = new Queueing();
-queueing.findAndAddTrack(19648, true);
+// const queueing = new Queueing();
+// queueing.findAndAddTrack(19648, true);

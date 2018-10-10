@@ -28,8 +28,9 @@ const trackChangeCallback = function (trackData) {
 
       const playNextTrack = function() {
         getNextTrackStack().then(function (data) {
-            console.log(JSON.stringify(data))
-            // @TODO remove previous track and add next track data[0])
+            // @TODO remove previous track
+            const queueing = new Queueing(data),
+            pl = queueing.addTrack(true);
         })    
       }
         
@@ -71,11 +72,12 @@ const getNextTrackStack = function () {
  * Starts playback on the temporary playlist.
  */
 const getFirstTrackStack = function () {
+
   getNextTrackStack().then(function (data) {
+    // @TODO cleaner presentation of data, ulimately dispatch to web interface
     console.log(JSON.stringify(data))
     const queueing = new Queueing(data),
       pl = queueing.addTrack(true);
-    // @TODO start event capture for adding more tracks.
   })
 }
 
@@ -86,8 +88,7 @@ const getFirstTrackStack = function () {
 const init = function () {
   const eventCapture = new EventCapture(trackChangeCallback)
 
-  // @TODO this may need to be moved to after the first track is playing.
-  //eventCapture.init()
+  eventCapture.init()
 
   getFirstTrackStack()
 }

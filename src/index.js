@@ -73,11 +73,10 @@ const getNextTrackStack = function () {
 const getFirstTrackStack = function () {
   getNextTrackStack().then(function (data) {
     console.log(JSON.stringify(data))
-    const queueing = new Queueing(data);
-    queueing.addTrack();
-
-    // @TODO start playback
-    // then start the eventCapture
+    const queueing = new Queueing(data),
+      pl = queueing.addTrack();
+    // @TODO start event capture
+    // @TODO go to playlist and start playback
   })
 }
 

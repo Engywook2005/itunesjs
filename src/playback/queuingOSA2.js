@@ -24,35 +24,54 @@ class Queueing {
     }
 
     findTrack(dbID) {
+        return new Promise((resolve, reject) => {
+            const getKnownTracks = osa((promiseObj) => {
+                const dbID = promiseObj.dbID;
+                const resolve = promiseObj.resolve;
+                const reject = promiseObj.reject;
 
-        const getKnownTracks = osa((dbID) => {
-            const knownTracks = Application('iTunes').sources["Library"].userPlaylists.byName('masterplaylist').tracks; 
-            let trackToAdd;
+                console.log(promiseObj.resolve);
 
-            for(let prop in knownTracks) {
+                const knownTracks = Application('iTunes').sources["Library"].userPlaylists.byName('masterplaylist').tracks; 
+    
+                let trackToAdd;
 
-                //console.log(dbID + " " + knownTracks[prop].databaseID());
-                if(knownTracks[prop].databaseID() === dbID) {
-                  console.log('found by database id: ' + knownTracks[prop].name());
-                  trackToAdd = knownTracks[prop];
-                  break;
-                }
-            }  
-            
-            //return true;
-            // WHY THE FUCK IS THIS UNDEFINED WHEN I TRY TO SEND BACK AS-IS?
-            // the resolve handler is undefined when I return trackToAdd; trackToAdd.name() is OK
-            // I think I'll have to resolve the outer promise from here
-            return trackToAdd;
-            //resolve(trackToAdd.name());
-        }); 
-        getKnownTracks(dbID).then(function(data) {
-            console.log("response: " + data);
-        }).catch(
-            function(error) {
-                console.log("error: " + error);
+                for(let prop in knownTracks) {
+    
+                    //console.log(dbID + " " + knownTracks[prop].databaseID());
+                    if(knownTracks[prop].databaseID() === dbID) {
+                      console.log('found by database id: ' + knownTracks[prop].name());
+                      console.log(this);
+                      trackToAdd = knownTracks[prop];
+                      break;
+                    }
+                }  
+                
+                //resolve(trackToAdd);
+
+                return true;
+                // WHY THE FUCK IS THIS UNDEFINED WHEN I TRY TO SEND BACK AS-IS?
+                // the resolve handler is undefined when I return trackToAdd; trackToAdd.name() is OK
+                // I think I'll have to resolve the outer promise from here
+                //return trackToAdd;
+                //resolve(trackToAdd.name());
+            }); 
+            const promiseObj = {
+                'dbID' : dbID,
+                'resolve' : resolve,
+                'reject' : reject
             }
-        );
+
+            console.log(promiseObj.resolve);
+
+            getKnownTracks(promiseObj).then(function(data) {
+                console.log(data);
+            }).catch(
+                function(error) {
+                    reject(error);
+                }
+            );
+        });
     }
 }
 
@@ -60,4 +79,10 @@ module.exports.Queueing = Queueing;
 
 // @TODO test lines, remove
 const queueing = new Queueing();
-queueing.findTrack(19648);
+//queueing.findTrack(19648);
+
+queueing.findTrack(19468).then(function(data) {
+    console.log(data.name());
+}).catch(function(error){
+    console.log(error);
+});

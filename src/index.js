@@ -74,9 +74,8 @@ const getFirstTrackStack = function () {
   getNextTrackStack().then(function (data) {
     console.log(JSON.stringify(data))
     const queueing = new Queueing(data),
-      pl = queueing.addTrack();
-    // @TODO start event capture
-    // @TODO go to playlist and start playback
+      pl = queueing.addTrack(true);
+    // @TODO start event capture for adding more tracks.
   })
 }
 

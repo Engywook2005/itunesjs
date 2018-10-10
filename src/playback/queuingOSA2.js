@@ -3,50 +3,72 @@ const osa = require('osa2');
 class Queueing {
 
     constructor(trackStack = []) {
-        // @TODO fill this in when done with dev testing. Should be about the same as queueing.js except there is no this->iTunes
+        this.trackStack = trackStack;
     }
 
     // @TODO will need to revise this somewhat as everything is going to be returning promises
-    addTrack() {
-        /*
-        const nextTrack = this.trackStack.shift(),
-          dbID = nextTrack["Track ID"],
-          tempPlaylist = this.findPlaylist(),
-          trackToAdd = this.findTrack(dbID);
-        
-        if(trackToAdd && tempPlaylist) {
-            this.addTrackToPlaylist(trackToAdd, tempPlaylist);
+    addTrack(startPlayback) {
+        if(this.trackStack.length <= 0) {
+            process.exit();
         }
-     
-        // Should be OK to return the shifted playlist before promises are carried out. 
-        return tempPlaylist;
-        */
+
+        const nextTrack = this.trackStack.shift(),
+          dbID = nextTrack["Track ID"];
+
+        this.findAndAddTrack(dbID, startPlayback);  
     }
 
-    findTrack(dbID) {
+    // called by addTrack
+    findAndAddTrack(dbID, startPlayback) {
+        
+        // @TODO want to look into this a bit more, but it seems that the function within osa is not permeable to
+        // anything but primitives (e.g. no functions, iTunes tracks, etc can be gotten out of here or passed in via function.)
 
-        const getKnownTracks = osa((dbID) => {
-            const knownTracks = Application('iTunes').sources["Library"].userPlaylists.byName('masterplaylist').tracks; 
-            let trackToAdd;
+        // Definitely can't pass functions into here? If that's possible, I may be able to pass in the 
+        // trackfinding, playlistfinding, and track adding functions to the osa call...//#endregion
+        const execAddTrack = osa((dbID, startPlayback) => {
+            // @TODO configurable source and temp playlist names
+
+            const knownPlaylists = Application('iTunes').sources["Library"].userPlaylists, 
+                knownTracks = knownPlaylists.byName('masterplaylist').tracks; 
+            let trackToAdd, tempPlaylist;
 
             for(let prop in knownTracks) {
-
-                //console.log(dbID + " " + knownTracks[prop].databaseID());
                 if(knownTracks[prop].databaseID() === dbID) {
                   console.log('found by database id: ' + knownTracks[prop].name());
                   trackToAdd = knownTracks[prop];
                   break;
                 }
             }  
+
+            if(!trackToAdd) {
+              return false;      
+            }
+
+            for(let prop in knownPlaylists) {
+                if(knownPlaylists[prop].name() === 'tempUber') {
+                    tempPlaylist = knownPlaylists[prop];
+                }
+            }
             
-            //return true;
-            // WHY THE FUCK IS THIS UNDEFINED WHEN I TRY TO SEND BACK AS-IS?
-            // the resolve handler is undefined when I return trackToAdd; trackToAdd.name() is OK
-            // I think I'll have to resolve the outer promise from here
-            return trackToAdd;
-            //resolve(trackToAdd.name());
+            if(!tempPlaylist) {
+              tempPlaylist = Application('iTunes').UserPlaylist().make();
+              tempPlaylist.name = 'tempUber';  
+            }
+
+            if(!tempPlaylist) {
+                return false;
+            }
+
+            trackToAdd.duplicate({to:tempPlaylist});
+
+            if(startPlayback && Application('iTunes').playerState() !== 'playing') {
+                tempPlaylist.play();
+            }
+
+            return true;
         }); 
-        getKnownTracks(dbID).then(function(data) {
+        execAddTrack(dbID, startPlayback).then(function(data) {
             console.log("response: " + data);
         }).catch(
             function(error) {
@@ -60,4 +82,4 @@ module.exports.Queueing = Queueing;
 
 // @TODO test lines, remove
 const queueing = new Queueing();
-queueing.findTrack(19648);
+queueing.findAndAddTrack(19648, true);

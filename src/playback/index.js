@@ -1,3 +1,3 @@
-const Queueing = require('./queueing').Queueing
+const Queueing = require('./queueingOSA2').Queueing
 
 module.exports.Queueing = Queueing;

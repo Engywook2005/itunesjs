@@ -35,15 +35,11 @@ class Queueing {
         let tempPlaylist;
 
         for(let prop in knownPlaylists) {
-            console.log(prop);
-            /*
             if(knownPlaylists[prop].name() === 'tempUber') {
                 tempPlaylist = knownPlaylists[prop];
             }
-            */
         }
         
-        return;
         if(!tempPlaylist) {
           tempPlaylist = this.iTunes.UserPlaylist().make();
           tempPlaylist.name = 'tempUber';  

@@ -1,23 +1,60 @@
 const itunes = require('playback')
+const readline = require('readline')
 
 class EventCapture {
   constructor (trackChangeCallback) {
     this.trackChangeCallback = trackChangeCallback
+    this.isPaused = false
     this.currentTrack = null
     this.lastTrack = null
   }
 
   init () {
+    readline.emitKeypressEvents(process.stdin);
+    process.stdin.setRawMode(true);
+
+    // @TODO for clarity let's call this checkPlayingInterval
+    this.checkInterval = 0;
+    this.listenForKeypress()
     this.listenForTrackChange()
 
     // @TODO listen for keypress to pause and resume
     // https://thisdavej.com/making-interactive-node-js-console-apps-that-listen-for-keypress-events/
     // will need to clear interval on checkPlaying, then call itunes.pause() - just p?
-    // will also need to listen for a different keypress to get to process.exit - s
+    // will also need to listen for a different keypress to get to process.exit
+    // may be necessary to write out that artistHistory.json then - I eventually run into problems with that if 
+    // running too long (too many artists?)
+
+        // @TODO this whole class really should use the osa library, same as playlistInterface
 
   }
 
+  listenForKeypress() {
+    process.stdin.on('keypress', (str, key) => {
+      if(key.name === 'p') {
+        // @TODO clean up double negative here, move pause and resume ops to their own functions
+        // (on a different class?) Would be handy when also doing this via browser.
+        if(!this.isPaused) {
+          clearInterval(this.checkInterval);
+          itunes.pause();
+          this.isPaused = true;
+        } else {
+          itunes.play();
+          if(this.trackEndCallback) {
+            this.listenForTrackEnd(this.trackEndCallback);
+          }
+          this.isPaused = false;
+        }
+      }
+      if(key.ctrl && key.name === 'c') {
+        process.exit();
+      }
+    });
+  }
+
   listenForTrackEnd(callback) {
+    this.trackEndCallback = callback;
+
     console.log('listening for track end');
 
     const checkPlaying = function() {
@@ -26,15 +63,12 @@ class EventCapture {
       if(!isPlaying) {
         console.log('clearing interval. end of track.')
 
-        // @TODO would say this should be handled by making a callback but this whole class readlly 
-        // should use the osa library, same as playlistInterface
-        clearInterval(checkInterval);
+        clearInterval(this.checkInterval);
         callback();
-        // Now play the last track on the playlist
       }
-    }
+    }.bind(this);
 
-    let checkInterval = setInterval(function() {
+    this.checkInterval = setInterval(function() {
       checkPlaying();
     }, 1000);
   }

@@ -1,7 +1,12 @@
 const EventCapture = require('./playbackEvents').EventCapture
 const LastPlayByArtist = require('./artistRecords').LastPlayByArtist
+const TrackListDisplay = require('./artistRecords').TrackListDisplay
 const PlaylistParser = require('./playlistInterface').PlaylistParser
 const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter
+const NextTrack = require('./playback').NextTrack;
+const Queueing = require('./playback').Queueing;
+
+let eventCapture;
 
 /**
  * Called when a play event occurs. Checks to see if it is a different track from what has been
@@ -10,7 +15,9 @@ const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter
  * @param {*} trackData
  */
 const trackChangeCallback = function (trackData) {
-  const artistRecord = new LastPlayByArtist()
+
+  const artistRecord = new LastPlayByArtist();
+    
   artistRecord.loadArtistHistory(function (err, caller) {
     if (err) {
       console.log(err)
@@ -18,13 +25,34 @@ const trackChangeCallback = function (trackData) {
     }
     // @TODO date/time move to util function
     caller.updateArtist(trackData.artist, new Date().getTime())
-    caller.finalizeArtistHistory()
+    caller.finalizeArtistHistory(function (err, caller) {
+      if (err) {
+        console.log(err)
+        process.exit()
+      }
+
+      // @TODO should rename to addTrackToPlaylist
+      const playNextTrack = function() {
+        getNextTrackStack().then(function (data) {
+            // @TODO remove previous track
+            const queueing = new Queueing(data),
+            pl = queueing.addTrack(true);
+        })    
+      }
+        
+      // @TODO is it necessary to wait for the XML document to be rewritten?
+      setTimeout(playNextTrack, 1000);
+    })
   })
-  // @TODO call to get next stack of tracks - this may need to be in the callback for finalizeArtistHistory
-  // also should be in the form of a promise
-  // const nextTrackStack = getNextTrackStack()
-  // @TODO remove previous track and add next track nextTrackStack[0])
+
+  const trackEndedCallback = function() {
+    console.log('track ended callback');
+
+    // @TODO configurable
+    NextTrack.playLastTrack('tempUber');
+  }
   console.log(trackData)
+  eventCapture.listenForTrackEnd(trackEndedCallback);
 }
 
 /**
@@ -44,6 +72,7 @@ const getNextTrackStack = function () {
       const playlistFilterSorter = new PlaylistFilterSorter()
 
       playlistFilterSorter.runSort(playlist).then(function (data) {
+        TrackListDisplay.listTracks(data)
         resolve(data)
       })
     }
@@ -58,10 +87,14 @@ const getNextTrackStack = function () {
  * Starts playback on the temporary playlist.
  */
 const getFirstTrackStack = function () {
+
   getNextTrackStack().then(function (data) {
-    console.log(JSON.stringify(data))
-    /// @TODO add first two to temporary playlist
-    // @TODO start playing the playlist
+    // @TODO cleaner presentation of data, ulimately dispatch to web interface
+    const queueing = new Queueing(data),
+      pl = queueing.addTrack(true);
+  }).catch(function(err){
+    console.log(err);
+    process.exit();
   })
 }
 
@@ -70,7 +103,7 @@ const getFirstTrackStack = function () {
  *
  */
 const init = function () {
-  const eventCapture = new EventCapture(trackChangeCallback)
+  eventCapture = new EventCapture(trackChangeCallback)
 
   eventCapture.init()
 

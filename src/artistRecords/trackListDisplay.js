@@ -4,8 +4,8 @@ class TrackListDisplay {
         for(let i = 0; i < data.length; i++) {
             const trackOnList =  {
                 "trackID" : data[i]["Track ID"],
-                "name" : data[i]["Name"],
                 "artist" : data[i]["Artist"],
+                "name" : data[i]["Name"],
                 "album" : data[i]["Album"],
                 "playCount" : data[i]["Play Count"],
                 "playDate" : data[i]["Play Date UTC"],

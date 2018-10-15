@@ -154,6 +154,13 @@ class PlaylistFilterSorter {
         // @TODO Date.getTime is a utility function
         lastPlay = new Date().getTime() - this.lastPlayByArtist.checkArtistLastPlay(playList[currentTrackID].Artist)
 
+        // @TODO - perhaps only for the web form - output time left before exluded artists are playable.
+        /*
+        if(lastPlay < minimumTime && playList[currentTrackID].Artist === "Jethro Tull") {
+          console.log(playList[currentTrackID].Artist + " " + lastPlay + " " + minimumTime);
+        }
+        */
+
         if (lastPlay < 0 || lastPlay > minimumTime) {
           refinedPlaylist.push(playList[currentTrackID])
         }

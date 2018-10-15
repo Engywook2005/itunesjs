@@ -3,7 +3,7 @@ const PlaybackStateListener = require('./playerStateListener').PlayerStateListen
 class PlaybackStateResponder {
     constructor() {
         this.playbackStateCallbacks = {};
-        this.playbackStateListener = new PlaybackStateListener(this.playbackStateResponse);
+        this.playbackStateListener = new PlaybackStateListener(this.playbackStateResponse.bind(this));
     }
 
     setPlaybackStateResponse(playbackState, callback = () => {}) {
@@ -11,15 +11,21 @@ class PlaybackStateResponder {
     };
 
     playbackStateResponse(playbackState) {
+        console.log(playbackState);
+
         const stateCallback = this.playbackStateCallbacks[playbackState];
 
         if(stateCallback && typeof stateCallback === 'function') {
           stateCallback();  
         }
+
+        this.startListener();
     }
 
     startListener() {
         this.playbackStateListener.listenPlayerState();
     }
 }
+
+module.exports.PlaybackStateResponder = PlaybackStateResponder;
 

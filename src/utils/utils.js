@@ -26,7 +26,7 @@ class Utils {
 
 module.exports.Utils = Utils;
 
-// REMOVE!!! testing only
+// REMOVE!!! testing/usage example only
 /*
 Utils.getCurrentTrack().then((data) => {
   console.log(data);

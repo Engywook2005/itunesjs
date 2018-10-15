@@ -1,12 +1,15 @@
-const EventCapture = require('./playbackEvents').EventCapture
+const PlaybackStateResponder = require('./playbackEvents').PlaybackStateResponder
 const LastPlayByArtist = require('./artistRecords').LastPlayByArtist
 const TrackListDisplay = require('./artistRecords').TrackListDisplay
 const PlaylistParser = require('./playlistInterface').PlaylistParser
 const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter
 const NextTrack = require('./playback').NextTrack;
 const Queueing = require('./playback').Queueing;
+const Utils = require('./utils').Utils;
 
-let eventCapture;
+let playbackStateResponder = new PlaybackStateResponder();
+  isPaused = false,
+  currentTrack = null;
 
 /**
  * Called when a play event occurs. Checks to see if it is a different track from what has been
@@ -24,6 +27,8 @@ const trackChangeCallback = function (trackData) {
       process.exit()
     }
     // @TODO date/time move to util function
+    // I also think it's a problem that adding the next track is a response to update artist history...
+    // If that feature doesn't work, this whole app doesn't work.
     caller.updateArtist(trackData.artist, new Date().getTime())
     caller.finalizeArtistHistory(function (err, caller) {
       if (err) {
@@ -31,8 +36,7 @@ const trackChangeCallback = function (trackData) {
         process.exit()
       }
 
-      // @TODO should rename to addTrackToPlaylist
-      const playNextTrack = function() {
+      const addTrackToPlaylist = function() {
         getNextTrackStack().then(function (data) {
             // @TODO remove previous track
             const queueing = new Queueing(data),
@@ -41,18 +45,30 @@ const trackChangeCallback = function (trackData) {
       }
         
       // @TODO is it necessary to wait for the XML document to be rewritten?
-      setTimeout(playNextTrack, 1000);
+      setTimeout(addTrackToPlaylist, 1000);
     })
   })
+}
 
-  const trackEndedCallback = function() {
-    console.log('track ended callback');
+// Response to playing event
+const checkNewTrack = function() {
+  Utils.getCurrentTrack().then((data) => {
+    if(JSON.stringify(data) !== JSON.stringify(currentTrack)) {
+      trackChangeCallback(data);
+    }
+  }).catch((err) => {
+    console.log(err);
+    process.exit();
+  });
 
-    // @TODO configurable
-    NextTrack.playLastTrack('tempUber');
-  }
-  console.log(trackData)
-  eventCapture.listenForTrackEnd(trackEndedCallback);
+}
+
+// Response to stopped event
+const trackEndedCallback = function() {
+  console.log('track ended callback');
+
+  // @TODO configurable playlist name
+  NextTrack.playLastTrack('tempUber');
 }
 
 /**
@@ -103,9 +119,23 @@ const getFirstTrackStack = function () {
  *
  */
 const init = function () {
+  /*
   eventCapture = new EventCapture(trackChangeCallback)
 
   eventCapture.init()
+  */
+
+  // @TODO use playbackStateResponder
+
+  playbackStateResponder.setPlaybackStateResponse('playing', () => {
+    console.log('playing response')
+    playbackStateResponder.setPlaybackStateResponse('stopped', () => {
+      trackEndedCallback();
+    });
+    checkNewTrack();
+  })
+
+  playbackStateResponder.startListener();
 
   getFirstTrackStack()
 }

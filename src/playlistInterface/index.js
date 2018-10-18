@@ -1,5 +1,5 @@
-const PlaylistParser = require('./playlistParser').PlaylistParser
+const SourcePlaylistReader = require('./sourcePlaylistReader').SourcePlaylistReader
 const PlaylistFilterSorter = require('./playlistFilterSorter').PlaylistFilterSorter
 
-module.exports.PlaylistParser = PlaylistParser
+module.exports.SourcePlaylistReader = SourcePlaylistReader
 module.exports.PlaylistFilterSorter = PlaylistFilterSorter

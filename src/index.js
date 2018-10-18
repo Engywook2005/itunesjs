@@ -1,8 +1,8 @@
 const PlaybackStateResponder = require('./playbackEvents').PlaybackStateResponder
 const LastPlayByArtist = require('./artistRecords').LastPlayByArtist
 const TrackListDisplay = require('./artistRecords').TrackListDisplay
-const PlaylistParser = require('./playlistInterface').PlaylistParser
 const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter
+const SourcePlaylistReader = require('./playlistInterface').SourcePlaylistReader
 const NextTrack = require('./playback').NextTrack;
 const Queueing = require('./playback').Queueing;
 const Utils = require('./utils').Utils;
@@ -36,11 +36,15 @@ const trackChangeCallback = function (trackData) {
         process.exit()
       }
 
+      // @TODO make then and catch consistent
       const addTrackToPlaylist = function() {
-        getNextTrackStack().then(function (data) {
+        getNextTrackStack().then(function(data) {
             // @TODO remove previous track
             const queueing = new Queueing(data),
             pl = queueing.addTrack(true);
+        }).catch((err) => {
+          console.log(err);
+          process.exit();
         })    
       }
         
@@ -81,23 +85,25 @@ const trackEndedCallback = function() {
  */
 const getNextTrackStack = function () {
   return new Promise(function (resolve, reject) {
-    const parseCallback = function (err, playlist) {
-      if (err) {
-        console.log(err)
-        process.exit()
-      }
+    const parseCallback = function (playlist) {
 
       // Filter and sort playlist.
       const playlistFilterSorter = new PlaylistFilterSorter()
 
       playlistFilterSorter.runSort(playlist).then(function (data) {
-        TrackListDisplay.listTracks(data)
+        TrackListDisplay.listTracks(data, 'Tracks in queue:')
         resolve(data)
+      }).catch((err) => {
+        reject(err);
       })
     }
-
-    const playlistParser = new PlaylistParser(parseCallback)
-    playlistParser.readLibraryToJSON()
+    
+    // @TODO make configurable
+    SourcePlaylistReader.getSourcePlaylist('masterplaylist').then((data) => {
+      parseCallback(data);
+    }).catch((err) => {
+      reject(err);
+    })
   })
 }
 
@@ -108,7 +114,7 @@ const getNextTrackStack = function () {
 const getFirstTrackStack = function () {
 
   getNextTrackStack().then(function (data) {
-    // @TODO cleaner presentation of data, ultimately dispatch to web interface
+    // @TODO isn't this exactly the same code that runs after all the rest of the tracks have been added?
     const queueing = new Queueing(data),
       pl = queueing.addTrack(true);
   }).catch(function(err){
@@ -125,7 +131,7 @@ const init = function () {
   // @TODO use playbackStateResponder
 
   playbackStateResponder.setPlaybackStateResponse('playing', () => {
-    console.log('playing response')
+    TrackListDisplay.listTracks(Utils.getCurrentTrack(), 'Now playing:');
     playbackStateResponder.setPlaybackStateResponse('stopped', () => {
       trackEndedCallback();
     });

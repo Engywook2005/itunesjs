@@ -13,9 +13,11 @@ class Queueing {
         }
 
         const nextTrack = this.trackStack.shift(),
-          dbID = nextTrack["Track ID"];
+          dbID = nextTrack.trackID;
 
         this.findAndAddTrack(dbID, startPlayback);  
+        
+        return this.trackStack;
     }
 
     // called by addTrack
@@ -69,18 +71,19 @@ class Queueing {
             return true;
         }); 
 
+        // @TODO handle failure outside of this class.
         execAddTrack(dbID, startPlayback).then(function(data) {
-            console.log("response: " + data);
+            if(!data) {
+                console.log('failure to find target track: ' + dbID);
+                process.exit();
+            }
         }).catch(
             function(error) {
                 console.log("error: " + error);
+                process.exit();
             }
         );
     }
 }
 
 module.exports.Queueing = Queueing;
-
-// @TODO test lines, remove
-// const queueing = new Queueing();
-// queueing.findAndAddTrack(19648, true);

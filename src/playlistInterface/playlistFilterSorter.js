@@ -1,4 +1,5 @@
 const LastPlayByArtist = require('../artistRecords').LastPlayByArtist
+const Utils = require('../utils').Utils;
 
 /**
  * Uses config to filter and sort master playlist.
@@ -17,7 +18,12 @@ class PlaylistFilterSorter {
    */
   runSort (playList) {
     return new Promise(function (resolve, reject) {
+      // @TODO err should be first? Also handle err 
       const recentArtistCallback = function (refinedPlaylist, err) {
+        if(err) {
+          reject(err);
+        };
+
         // refinedPlaylist is a simple array which will be filtered and sorted.
         // in any case I don't think theres any need to store this as an object from here on out.
 
@@ -32,14 +38,14 @@ class PlaylistFilterSorter {
 
         // Then sort what's left by number of plays, in ascending order. Take the first 25.
         // @TODO - configurable how many tracks to take. The reason for doing this is a little hard to explain.
-        refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'Play Count')
+        refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'playCount')
 
         if (refinedPlaylist.length > numberOnShortList) {
           refinedPlaylist = refinedPlaylist.splice(0, numberOnShortList)
         }
 
         // Finally sort by last play date. In this case we do not need to worry about changing apple time to unix epoch
-        refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'Play Date')
+        refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'lastPlayed')
 
         resolve(refinedPlaylist)
       }.bind(this)
@@ -64,9 +70,10 @@ class PlaylistFilterSorter {
       const rankings = {
         '5': 28,
         '4': 56
-      }
-
-      const trackRating = (playlistItem.Rating / 20).toString()
+      },
+        trackRating = (playlistItem.rating / 20).toString(),
+        // @TODO timestamp should be a utils function
+        rightNow = Utils.getTimestamp();
 
       let minimumWait = 168
 
@@ -76,28 +83,9 @@ class PlaylistFilterSorter {
 
       minimumWait *= 24 * 3600 * 1000
 
-      // @TODO need to do something about last played from playlist - this is on a different scale
-      // See https://www.epochconverter.com/mac
+      const lastPlay = playlistItem.lastPlayed ? Utils.getTimestamp(playlistItem.lastPlayed) : rightNow;
 
-      // @TODO this should be in utils as well
-      const appleTimeStampToUnixEpoch = function (appleTime) {
-        let unixTime = appleTime
-
-        // How long between 1971 and 1904
-        unixTime -= (66 * 365 * 24 * 3600)
-
-        // Also have to account for leap years!
-        unixTime -= (17 * 24 * 3600)
-
-        // We store it in milliseconds
-        unixTime *= 1000
-
-        return unixTime
-      }
-
-      const lastPlay = appleTimeStampToUnixEpoch(playlistItem['Play Date'])
-
-      return new Date().getTime() - lastPlay > minimumWait
+      return rightNow - lastPlay > minimumWait
     })
 
     return playListArray
@@ -149,20 +137,20 @@ class PlaylistFilterSorter {
       const dontPlayWithinDays = 1
 
       const minimumTime = dontPlayWithinDays * 24 * 3600 * 1000
-      let currentTrackID, lastPlay
-      for (currentTrackID in playList) {
+      let lastPlay
+      for (let i = 0; i < playList.length; i++) {
         // @TODO Date.getTime is a utility function
-        lastPlay = new Date().getTime() - this.lastPlayByArtist.checkArtistLastPlay(playList[currentTrackID].Artist)
+        lastPlay = new Date().getTime() - this.lastPlayByArtist.checkArtistLastPlay(playList[i].artist)
 
         // @TODO - perhaps only for the web form - output time left before exluded artists are playable.
         /*
         if(lastPlay < minimumTime && playList[currentTrackID].Artist === "Jethro Tull") {
-          console.log(playList[currentTrackID].Artist + " " + lastPlay + " " + minimumTime);
+          console.log(playList[i].Artist + " " + lastPlay + " " + minimumTime);
         }
         */
 
         if (lastPlay < 0 || lastPlay > minimumTime) {
-          refinedPlaylist.push(playList[currentTrackID])
+          refinedPlaylist.push(playList[i])
         }
       }
 

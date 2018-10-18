@@ -13,13 +13,14 @@ class Utils {
     static getTrackDescriptors() {
         // Property name we are using : function to be called on track
         return {
-            'trackId': 'databaseID',
+            'trackID': 'databaseID',
             'name': 'name',
             'artist': 'artist',
             'album': 'album',
+            'duration': 'duration',
             'lastPlayed': 'playedDate',
             'playCount': 'playedCount',
-            'rating': 'rating'
+            'rating': 'rating'        
         }
     }
 
@@ -27,12 +28,6 @@ class Utils {
         // @TODO needs to either be a promise or send a callback itself. Ugh.
 
         return new Promise((resolve, reject) => {
-            const utilsBucket = {
-                returnUtils: function() {
-                    return Utils;
-                }
-            }
-
             const listCurrentTrack = osa(function (descriptors) {
                 const track = Application('iTunes').currentTrack(),
                   trackDescription = {};
@@ -52,6 +47,19 @@ class Utils {
               reject(err);
             });
         });
+    }
+
+    // If right now, don't pass an argument
+    static getTimestamp(formattedDate = null, asMS = true) {
+        const date = formattedDate ? new Date(formattedDate) : new Date();
+       
+        const timestamp = date.getTime();
+
+        if(asMS) {
+          return timestamp; 
+        } else {
+          return Math.floor(timestamp / 1000);
+        }
     }
 }
 

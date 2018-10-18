@@ -1,5 +1,7 @@
 const osa = require('osa2');
 
+// @TODO the name of this class is slightly confusing. Not clear that it plays the next track.
+// Could even call this one DiscJockey. Or perhaps that's a better name for this whole class.
 class NextTrack {
 
     static playLastTrack(playlistName) {

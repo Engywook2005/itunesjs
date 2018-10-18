@@ -36,10 +36,6 @@ class LastPlayByArtist {
         this.artistHistory = JSON.parse(data)
         cb(err, this)
       }
-      if (err) {
-        console.log(err)
-        process.exit();
-      }
     }.bind(this))
   }
 

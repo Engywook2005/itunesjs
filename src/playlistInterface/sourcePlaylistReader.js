@@ -34,10 +34,10 @@ class SourcePlaylistReader {
                } catch(err) {
                    trackAddable = false;
                }
-               if(trackAddable) {
-                 sourcePlaylistTracks.push(trackDescription);
-               }
-               i++
+
+               sourcePlaylistTracks.push(trackAddable ? trackDescription : {'placeholder': true} );
+
+               i++;
             }
 
             // If we've gotten to the last track let the caller know we are done.
@@ -57,7 +57,7 @@ class SourcePlaylistReader {
                   resolve(returnedTracks);  
                 }
                 else {
-                  sourcePlaylistToObject(returnedTracks.length);  
+                  sourcePlaylistToObject(returnedTracks.length);
                 }
               }).catch((err) => {
                 reject(err);

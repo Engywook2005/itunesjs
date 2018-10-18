@@ -1,5 +1,6 @@
 const fs = require('fs')
 
+// @TODO should not need this library anymore
 const itunesData = require('itunes-data')
 
 /**

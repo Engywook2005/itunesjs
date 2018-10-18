@@ -53,7 +53,10 @@ const trackChangeCallback = function (trackData) {
 // Response to playing event
 const checkNewTrack = function() {
   Utils.getCurrentTrack().then((data) => {
-    if(JSON.stringify(data) !== JSON.stringify(currentTrack)) {
+    // @FIXME currentTrack is never the same as currentTrack
+    if(data !== currentTrack) {
+      // probably because currentTrack is never updated?
+      currentTrack = data;
       trackChangeCallback(data);
     }
   }).catch((err) => {
@@ -105,7 +108,7 @@ const getNextTrackStack = function () {
 const getFirstTrackStack = function () {
 
   getNextTrackStack().then(function (data) {
-    // @TODO cleaner presentation of data, ulimately dispatch to web interface
+    // @TODO cleaner presentation of data, ultimately dispatch to web interface
     const queueing = new Queueing(data),
       pl = queueing.addTrack(true);
   }).catch(function(err){
@@ -119,12 +122,6 @@ const getFirstTrackStack = function () {
  *
  */
 const init = function () {
-  /*
-  eventCapture = new EventCapture(trackChangeCallback)
-
-  eventCapture.init()
-  */
-
   // @TODO use playbackStateResponder
 
   playbackStateResponder.setPlaybackStateResponse('playing', () => {

@@ -7,7 +7,9 @@ const NextTrack = require('./playback').NextTrack;
 const Queueing = require('./playback').Queueing;
 const Utils = require('./utils').Utils;
 
-let playbackStateResponder = new PlaybackStateResponder();
+// @TODO have a look around for all process.exit calls. Generally should only be in this file.
+
+let playbackStateResponder = new PlaybackStateResponder(),
   isPaused = false,
   currentTrack = null;
 
@@ -49,18 +51,18 @@ const trackChangeCallback = function (trackData) {
       }
         
       // @TODO is it necessary to wait for the XML document to be rewritten?
+      // Now that we're no longer using the XML document from itunes, I'm almost
+      // sure there's no longer a need for setting a timeout
       setTimeout(addTrackToPlaylist, 1000);
     })
   })
 }
 
-// Response to playing event
 const checkNewTrack = function() {
   Utils.getCurrentTrack().then((data) => {
-    // @FIXME currentTrack is never the same as currentTrack
-    if(data !== currentTrack) {
-      // probably because currentTrack is never updated?
+    if(!currentTrack || (data.trackID !== currentTrack.trackID)) {
       currentTrack = data;
+      TrackListDisplay.listTracks([ data ], 'Now playing');
       trackChangeCallback(data);
     }
   }).catch((err) => {
@@ -131,7 +133,6 @@ const init = function () {
   // @TODO use playbackStateResponder
 
   playbackStateResponder.setPlaybackStateResponse('playing', () => {
-    TrackListDisplay.listTracks(Utils.getCurrentTrack(), 'Now playing:');
     playbackStateResponder.setPlaybackStateResponse('stopped', () => {
       trackEndedCallback();
     });

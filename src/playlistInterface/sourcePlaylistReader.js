@@ -7,16 +7,18 @@ class SourcePlaylistReader {
       return new Promise((resolve, reject) => {
           let returnedTracks = []; 
 
-          const execGetSourcePlaylist = osa((descriptors, playlistName, startNumber)=> {
+          const execGetSourcePlaylist = osa((descriptors, playlistName, startNumber, lengthLimit = 1000) => {
+
             // @TODO - Boilerplate code, wish I only needed to do this once
             const knownPlaylists = Application('iTunes').sources["Library"].userPlaylists, 
               targetPlaylist = knownPlaylists.byName(playlistName),
               knownTracks = targetPlaylist.tracks,
-              endNumber = (startNumber + 1000 > knownTracks.length) ? knownTracks.length : 1000,
               sourcePlaylistTracks = []; 
-            
-            // @TODO instead check buffer on array size
-            for(let i = startNumber; i < endNumber; i++) {
+
+            // @TODO would be nicer to check on the buffer size we're in danger of overflowing.            
+            let i = startNumber;
+
+            while(i < knownTracks.length && sourcePlaylistTracks.length < lengthLimit) {
                 const track = knownTracks[i], 
                   trackDescription = {};
 
@@ -35,34 +37,45 @@ class SourcePlaylistReader {
                if(trackAddable) {
                  sourcePlaylistTracks.push(trackDescription);
                }
+               i++
+            }
+
+            // If we've gotten to the last track let the caller know we are done.
+            if(i === knownTracks.length) {
+              sourcePlaylistTracks.push('eof');  
             }
 
             return sourcePlaylistTracks;
 
           });
 
-          // @TODO this needs to be handled more elegantly - recursive function, EOF added 
-          // to end of array when complete
-          execGetSourcePlaylist(Utils.getTrackDescriptors(), playlistName, 0).then((data) => {
-              returnedTracks = returnedTracks.concat(data);
-              execGetSourcePlaylist(Utils.getTrackDescriptors(), playlistName, 1000).then((data) => {
+          const sourcePlaylistToObject = function(startNumber = 0) {
+            execGetSourcePlaylist(Utils.getTrackDescriptors(), playlistName, startNumber, 500).then((data) => {
                 returnedTracks = returnedTracks.concat(data);
-                resolve(returnedTracks);
+                if(returnedTracks[returnedTracks.length - 1] === 'eof') {
+                  returnedTracks.pop();  
+                  resolve(returnedTracks);  
+                }
+                else {
+                  sourcePlaylistToObject(returnedTracks.length);  
+                }
               }).catch((err) => {
                 reject(err);
               });
-          }).catch((err) => {
-              reject(err);
-          });
+          }
+
+          sourcePlaylistToObject();
       })
     }
 }
 
 module.exports.SourcePlaylistReader = SourcePlaylistReader;
 
-// @TODO remove! test use case
+// @TODO remove! test use case and usage example
+/*
 SourcePlaylistReader.getSourcePlaylist('masterplaylist').then((data) => {
     console.log(data);
 }).catch((err) => {
     console.log(err);
 });
+*/

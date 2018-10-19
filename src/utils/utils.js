@@ -61,6 +61,31 @@ class Utils {
           return Math.floor(timestamp / 1000);
         }
     }
+
+    // @TODO tighten this up
+    static secondsToHoursMinutesSeconds(seconds) {
+        let remainderSeconds = 0;
+
+        let hours = Math.floor(seconds / 3600);
+        if(hours < 10) {
+            hours = '0' + hours;
+        }
+
+        remainderSeconds = seconds % 3600;
+
+        let minutes = Math.floor(remainderSeconds / 60);
+        if(minutes < 10) {
+            minutes = '0' + minutes;
+        }
+
+        remainderSeconds = Math.floor(remainderSeconds % 60);
+
+        if(remainderSeconds < 10) {
+            remainderSeconds = '0' + remainderSeconds;
+        }
+
+        return hours + ':' + minutes + ':' + remainderSeconds;
+    }
 }
 
 module.exports.Utils = Utils;

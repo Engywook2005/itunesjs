@@ -17,7 +17,8 @@ class NextTrack {
             return true;
         });
 
-        execLastTrack(playlistName).then(console.log).catch(console.error);
+        // @TODO don't exit here if this breaks, but do need to have an error handler at top level
+        execLastTrack(playlistName).then().catch();
     }
 }
 

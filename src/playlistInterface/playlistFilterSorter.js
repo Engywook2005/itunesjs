@@ -40,6 +40,8 @@ class PlaylistFilterSorter {
         // @TODO - configurable how many tracks to take. The reason for doing this is a little hard to explain.
         refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'playCount')
 
+        this.logTimeRemaining(refinedPlaylist);
+
         if (refinedPlaylist.length > numberOnShortList) {
           refinedPlaylist = refinedPlaylist.splice(0, numberOnShortList)
         }
@@ -54,6 +56,21 @@ class PlaylistFilterSorter {
       // @TODO - configurable how long to wait to play the same artist again
       this.filterRecentArtists(playList, recentArtistCallback)
     }.bind(this))
+  }
+
+  // @TODO this function should perhaps not go here
+  logTimeRemaining(playlist) {
+    let timeRemaining = 0;
+
+    // @TODO use Array.reduce
+    for(let i = 0; i < playlist.length; i++) {
+      timeRemaining += playlist[i].duration;
+    }
+
+    const timeString = Utils.secondsToHoursMinutesSeconds(timeRemaining);
+
+    // @TODO send through TrackListDisplay (perhaps renamed)
+    console.log('Estimated time remaining in queue: ' + timeString);
   }
 
   /**

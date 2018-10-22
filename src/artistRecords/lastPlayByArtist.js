@@ -11,7 +11,7 @@ class LastPlayByArtist {
 
   // @TODO may be necessary to only load the artistHistory when app first loads and resave the updated
   // version when shutting down. I am seeing that sometimes (for certain artists? System too busy? artistHistory
-  // is too long?) 
+  // is too long?)
   // 1. I see 'buffer' followed by a bunch of numbers output
   // 2. The same track is queued up next because:
   // 3. Instead of the artist appearing in /artistHistory.json, I have a property called 'undefined' instead
@@ -27,7 +27,7 @@ class LastPlayByArtist {
 
   /**
    * Called when checking next tracks to play (read) and when beginning playback of track (write).
-   * 
+   *
    * @param {Function} cb
    */
   loadArtistHistory (cb) {

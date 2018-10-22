@@ -6,6 +6,7 @@ class PlayerStateListener {
         this.currentPlayerState = null;
     }
 
+    // @TODO our playerStateResponder should accept an error argument on its responder callback.
     listenPlayerState() {
         const checkPlayerState = osa(() => {
             return Application('iTunes').playerState();
@@ -22,6 +23,9 @@ class PlayerStateListener {
           this.responderCallback(playerState);
         }).catch((err) => {
             console.log(err);
+
+            // @TODO instead of exiting notify upstream, which should then (probably) exit.
+            // e.g. this.responderCallback(err, null);
             process.exit();
         });
     }

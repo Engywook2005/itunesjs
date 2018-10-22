@@ -6,21 +6,40 @@ class Queueing {
         this.trackStack = trackStack;
     }
 
-    // @TODO will need to revise this somewhat as everything is going to be returning promises
-    addTrack(startPlayback) {
+    // @TODO via promises. Send back up to index.js.
+    /**
+     * Finds next track to play from the queue and passes on to findAndAddTrack.
+     * @param {Boolean} startPlayback - If true, begin playing automatically.
+     * @param {Object} currentTrack - used to verify that the next track isn't the one that's already playing.
+     */
+    addTrack(startPlayback, currentTrack = null) {
         if(this.trackStack.length <= 0) {
-            process.exit();
+            return [];
         }
 
-        const nextTrack = this.trackStack.shift(),
-          dbID = nextTrack.trackID;
+        let nextTrack = this.trackStack.shift();
+
+        try {
+          if(currentTrack && nextTrack.dbID === currentTrack.dbID) {
+            nextTrack = this.trackStack.shift();
+          }
+        } catch(err) {
+          return [];  
+        }
+
+        const dbID = nextTrack.trackID;
 
         this.findAndAddTrack(dbID, startPlayback);  
         
         return this.trackStack;
     }
 
-    // called by addTrack
+    /**
+     * Receives id of selected track to add to playlist. Tells iTunes to find this track and add it to playlist. 
+     * Called by addTrack.
+     * @param {*} dbID - ID of track iTunes should add to the playlist.
+     * @param {*} startPlayback - If true, begin playing automatically.
+     */
     findAndAddTrack(dbID, startPlayback) {
         
         // @TODO want to look into this a bit more, but it seems that the function within osa is not permeable to
@@ -71,7 +90,8 @@ class Queueing {
             return true;
         }); 
 
-        // @TODO handle failure outside of this class.
+        // @TODO handle failure outside of this class. Should findAndAddTrack should itself
+        // return a promise. 
         execAddTrack(dbID, startPlayback).then(function(data) {
             if(!data) {
                 console.log('failure to find target track: ' + dbID);

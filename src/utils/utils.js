@@ -25,8 +25,6 @@ class Utils {
     }
 
     static getCurrentTrack() {
-        // @TODO needs to either be a promise or send a callback itself. Ugh.
-
         return new Promise((resolve, reject) => {
             const listCurrentTrack = osa(function (descriptors) {
                 const track = Application('iTunes').currentTrack(),
@@ -62,7 +60,8 @@ class Utils {
         }
     }
 
-    // @TODO tighten this up
+    // @TODO tighten this up - wonder if I could pass a raw number
+    // of seconds into a date object
     static secondsToHoursMinutesSeconds(seconds) {
         let remainderSeconds = 0;
 

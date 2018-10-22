@@ -44,12 +44,7 @@ class LastPlayByArtist {
     *
     * @param {Function} cb
     */
-  finalizeArtistHistory (cb = function (err, caller) {
-    if (err) {
-      console.log(err)
-      process.exit()
-    }
-  }) {
+  finalizeArtistHistory (cb) {
     fs.writeFile(this.hsDoc, JSON.stringify(this.artistHistory), {}, function (err) {
       cb(err, this)
     }.bind(this))

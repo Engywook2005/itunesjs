@@ -40,11 +40,9 @@ class Queueing {
      * @param {*} startPlayback - If true, begin playing automatically.
      */
   findAndAddTrack (dbID, startPlayback) {
-    // @TODO want to look into this a bit more, but it seems that the function within osa is not permeable to
-    // anything but primitives (e.g. no functions, iTunes tracks, etc can be gotten out of here or passed in via function.)
-
-    // Definitely can't pass functions into here? If that's possible, I may be able to pass in the
-    // trackfinding, playlistfinding, and track adding functions to the osa call...//#endregion
+    // @TODO An issue that most likely will require a change to OSA library: if you can't represent an argument as JSON,
+    // you can't pass it in as an argument. Same goes for return values, so tracks and playlists can't be returned intact
+    // from the function. This does mean that the osa call must be self-contained and that I have to repeat myself a lot.
     const execAddTrack = osa((dbID, startPlayback) => {
       // @TODO configurable source and temp playlist names
 

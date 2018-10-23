@@ -1,10 +1,11 @@
 const osa = require('osa2')
+const DisplayOutput = require('../output').DisplayOutput
 
 // @TODO the name of this class is slightly confusing. Not clear that it plays the next track.
 // Could even call this one DiscJockey. Or perhaps that's a better name for this whole class.
-class NextTrack {
+class DiscJockey {
   static playLastTrack (playlistName) {
-    console.log('jumping to last track')
+    DisplayOutput.simpleMessage('jumping to last track', 'queue status')
 
     const execLastTrack = osa((playlistName) => {
       const knownPlaylists = Application('iTunes').sources['Library'].userPlaylists
@@ -23,7 +24,4 @@ class NextTrack {
   }
 }
 
-module.exports.NextTrack = NextTrack
-
-// REMOVE - Testing only
-// NextTrack.playLastTrack('tempUber');
+module.exports.DiscJockey = DiscJockey

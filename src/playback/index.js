@@ -1,5 +1,5 @@
 const Queueing = require('./queueingOSA2').Queueing
-const NextTrack = require('./nextTrack').NextTrack
+const DiscJockey = require('./discJockey').DiscJockey
 
 module.exports.Queueing = Queueing
-module.exports.NextTrack = NextTrack
+module.exports.DiscJockey = DiscJockey

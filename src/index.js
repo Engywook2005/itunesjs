@@ -1,9 +1,9 @@
+const DisplayOutput = require('./output').DisplayOutput
 const PlaybackStateResponder = require('./playbackEvents').PlaybackStateResponder
 const LastPlayByArtist = require('./artistRecords').LastPlayByArtist
-const TrackListDisplay = require('./artistRecords').TrackListDisplay
 const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter
 const SourcePlaylistReader = require('./playlistInterface').SourcePlaylistReader
-const NextTrack = require('./playback').NextTrack
+const DiscJockey = require('./playback').DiscJockey
 const Queueing = require('./playback').Queueing
 const Utils = require('./utils').Utils
 
@@ -48,7 +48,7 @@ const checkNewTrack = function () {
   Utils.getCurrentTrack().then((data) => {
     if (!currentTrack || (data.trackID !== currentTrack.trackID)) {
       currentTrack = data
-      TrackListDisplay.listTracks([ data ], 'Now playing')
+      DisplayOutput.listTracks([ data ], 'Now playing')
       trackChangeCallback(data)
     }
   }).catch((err) => {
@@ -64,16 +64,15 @@ const checkNewTrack = function () {
  */
 const addTrackToPlaylist = function () {
   getNextTrackStack().then(function (data) {
-    const queueing = new Queueing(data)
-    // queueing.addTrack will return a promise, indicating number of tracks left. Check on tracklist length to
-    // determine whether to kill process here.
-    pl = queueing.addTrack(true)
-    if (pl.length === 0) {
-      // @TODO send to UI instead of logging here.
-      console.log('Queue is empty. Exiting.')
+    if (data.length === 0) {
+      DisplayOutput.simpleMessage('Queue is empty. Exiting.', 'Queue Status')
       process.exit()
     }
+    const queueing = new Queueing(data)
+    // @TODO queueing.addTrack will return a promise, indicating number of tracks left.
+    queueing.addTrack(true)
   }).catch((err) => {
+    DisplayOutput.errorMessage(err)
     console.log(err)
     process.exit()
   })
@@ -81,10 +80,12 @@ const addTrackToPlaylist = function () {
 
 /**
  * Response to stop event. Call to playLastTrack triggers the playing event, and its responders.
+ * In this usage, the playback event triggers a refresh of the queue and adding the top of the new queue
+ * to the end of the target playlist.
  */
 const trackEndedCallback = function () {
   // @TODO configurable playlist name
-  NextTrack.playLastTrack('tempUber')
+  DiscJockey.playLastTrack('tempUber')
 }
 
 /**
@@ -99,7 +100,7 @@ const getNextTrackStack = function () {
       const playlistFilterSorter = new PlaylistFilterSorter()
 
       playlistFilterSorter.runSort(playlist).then(function (data) {
-        TrackListDisplay.listTracks(data, 'Tracks in queue:')
+        DisplayOutput.listTracks(data, 'Tracks in queue:')
         resolve(data)
       }).catch((err) => {
         reject(err)
@@ -122,6 +123,7 @@ const getNextTrackStack = function () {
 const init = function () {
   playbackStateResponder.setPlaybackStateResponse('playing', () => {
     playbackStateResponder.setPlaybackStateResponse('stopped', () => {
+      // @TODO check on whether playlist still exists. If it doesn't, handle gracefully.
       trackEndedCallback()
     })
     checkNewTrack()

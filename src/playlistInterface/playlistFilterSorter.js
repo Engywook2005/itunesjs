@@ -1,5 +1,6 @@
+const DisplayOutput = require('../output').DisplayOutput
 const LastPlayByArtist = require('../artistRecords').LastPlayByArtist
-const Utils = require('../utils').Utils;
+const Utils = require('../utils').Utils
 
 /**
  * Uses config to filter and sort master playlist.
@@ -13,15 +14,15 @@ class PlaylistFilterSorter {
   /**
    * Externally callable function to sort playlist.
    *
-   * @param {*} playList
+   * @param {Object} playList
    * @returns Promise
    */
   runSort (playList) {
     return new Promise(function (resolve, reject) {
-      // @TODO err should be first? Also handle err 
+      // @TODO err should be first? Also handle err
       const recentArtistCallback = function (refinedPlaylist, err) {
-        if(err) {
-          reject(err);
+        if (err) {
+          reject(err)
         };
 
         // refinedPlaylist is a simple array which will be filtered and sorted.
@@ -40,7 +41,7 @@ class PlaylistFilterSorter {
         // @TODO - configurable how many tracks to take. The reason for doing this is a little hard to explain.
         refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'playCount')
 
-        this.logTimeRemaining(refinedPlaylist);
+        this.logTimeRemaining(refinedPlaylist)
 
         if (refinedPlaylist.length > numberOnShortList) {
           refinedPlaylist = refinedPlaylist.splice(0, numberOnShortList)
@@ -58,19 +59,22 @@ class PlaylistFilterSorter {
     }.bind(this))
   }
 
-  // @TODO this function should perhaps not go here
-  logTimeRemaining(playlist) {
-    let timeRemaining = 0;
+  /**
+   * Iterates through track list and outputs total duration remaining in the track list as
+   * it currently stands.
+   * @param {Object} playlist - List of tracks.
+   */
+  logTimeRemaining (playlist) {
+    let timeRemaining = 0
 
     // @TODO use Array.reduce
-    for(let i = 0; i < playlist.length; i++) {
-      timeRemaining += playlist[i].duration;
+    for (let i = 0; i < playlist.length; i++) {
+      timeRemaining += playlist[i].duration
     }
 
-    const timeString = Utils.secondsToHoursMinutesSeconds(timeRemaining);
+    const timeString = Utils.secondsToHoursMinutesSeconds(timeRemaining)
 
-    // @TODO send through TrackListDisplay (perhaps renamed)
-    console.log('Estimated time remaining in queue: ' + timeString);
+    DisplayOutput.simpleMessage(timeString, 'Time remaining in queue')
   }
 
   /**
@@ -87,10 +91,13 @@ class PlaylistFilterSorter {
       const rankings = {
         '5': 28,
         '4': 56
-      },
-        trackRating = (playlistItem.rating / 20).toString(),
-        // @TODO timestamp should be a utils function
-        rightNow = Utils.getTimestamp();
+      }
+
+      const trackRating = (playlistItem.rating / 20).toString()
+
+      // @TODO timestamp should be a utils function
+
+      const rightNow = Utils.getTimestamp()
 
       let minimumWait = 168
 
@@ -100,7 +107,11 @@ class PlaylistFilterSorter {
 
       minimumWait *= 24 * 3600 * 1000
 
-      const lastPlay = playlistItem.lastPlayed ? Utils.getTimestamp(playlistItem.lastPlayed) : rightNow;
+      const lastPlay = playlistItem.lastPlayed ? Utils.getTimestamp(playlistItem.lastPlayed) : rightNow
+
+      if (!playlistItem.lastPlayed) {
+        return true
+      }
 
       return rightNow - lastPlay > minimumWait
     })
@@ -118,6 +129,7 @@ class PlaylistFilterSorter {
    */
   sortPlaylist (playListArray, prop) {
     playListArray = playListArray.sort(function (itemA, itemB) {
+      // @TODO this can be more than one property, not necessarily playCount so rename variables
       const itemAPlayCount = itemA[prop]
 
       const itemBPlayCount = itemB[prop]

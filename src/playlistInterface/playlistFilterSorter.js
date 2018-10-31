@@ -134,12 +134,12 @@ class PlaylistFilterSorter {
 
       const itemBPlayCount = itemB[prop]
 
-      // Played fewer times? Bring to the front.
-      if (itemAPlayCount < itemBPlayCount) {
+      // Played fewer times or played less recently? Bring to the front.
+      if ((itemAPlayCount < itemBPlayCount) || !itemAPlayCount) {
         return -1
       }
 
-      if (itemAPlayCount > itemBPlayCount) {
+      if ((itemAPlayCount > itemBPlayCount) || !itemBPlayCount) {
         return 1
       }
 

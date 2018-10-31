@@ -70,6 +70,7 @@ const addTrackToPlaylist = function () {
     }
     const queueing = new Queueing(data)
     // @TODO queueing.addTrack will return a promise, indicating number of tracks left.
+    // @TODO if paused, need to wait until playing to call queueing.addTrack. Otherwise weird things still happen when resuming.
     queueing.addTrack(true)
   }).catch((err) => {
     DisplayOutput.errorMessage(err)

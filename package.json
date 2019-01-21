@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Ensures that the same artist plays no more than one time per specified interval",
   "main": "index.js",
-  "author": "<greg.thorson@sheknows.com>",
+  "author": "<gthorson73@gmail.com>",
   "license": "MIT",
   "private": false,
   "devDependencies": {

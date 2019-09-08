@@ -1,6 +1,6 @@
 const DisplayOutput = require('./output').DisplayOutput
 const PlaybackStateResponder = require('./playbackEvents').PlaybackStateResponder
-const LastPlayByArtist = require('./artistRecords').LastPlayByArtist
+const LastPlayRecord = require('./trackRecords').LastPlayRecord
 const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter
 const SourcePlaylistReader = require('./playlistInterface').SourcePlaylistReader
 const DiscJockey = require('./playback').DiscJockey
@@ -11,6 +11,25 @@ let playbackStateResponder = new PlaybackStateResponder()
 
 let currentTrack = null
 
+const artistRecord = new LastPlayRecord('artistHistoryLogging')
+const albumRecord = new LastPlayRecord('albumHistoryLogging')
+const songTitleRecord = new LastPlayRecord('songTitleHistoryLogging')
+
+const histories = {
+  'artist': {
+    class: artistRecord,
+    search: 'artist'
+  },
+  'album': {
+    class: albumRecord,
+    search: 'album'
+  },
+  'songTitle': {
+    class: songTitleRecord,
+    search: 'title'
+  }
+}
+
 /**
  * Called when a playing event occurs and the current track is not the same as the last track
  * (meaning that the playhead has moved on to a different track and we need to add another track
@@ -19,24 +38,28 @@ let currentTrack = null
  * @param {*} trackData
  */
 const trackChangeCallback = function (trackData) {
-  const artistRecord = new LastPlayByArtist()
 
-  // Updates last time a track by this artist has been played.
-  artistRecord.loadArtistHistory(function (err, caller) {
-    if (err) {
-      console.log('WARNING: ' + err)
-    }
-    // @TODO I think it's a problem that adding the next track is a response to update artist history...
-    // If that feature doesn't work, this whole app doesn't work.
-    caller.updateArtist(trackData.artist, Utils.getTimestamp())
-    caller.finalizeArtistHistory(function (err, caller) {
+  const histSet = Object.keys(histories)
+
+  for (let i = 0; i < histSet.length; i++) {
+    const record = histories[histSet[i]]
+
+    record.class.loadPlaybackHistory(function (err, caller) {
       if (err) {
         console.log('WARNING: ' + err)
       }
+      // @TODO I think it's a problem that adding the next track is a response to update artist history...
+      // If that feature doesn't work, this whole app doesn't work.
+      caller.updatePlaybackHistory(trackData[record.search], Utils.getTimestamp())
+      caller.finalizePlaybackHistory(function (err, caller) {
+        if (err) {
+          console.log('WARNING: ' + err)
+        }
 
-      addTrackToPlaylist()
+        addTrackToPlaylist()
+      })
     })
-  })
+  }
 }
 
 /**
@@ -98,7 +121,7 @@ const getNextTrackStack = function () {
   return new Promise(function (resolve, reject) {
     const parseCallback = function (playlist) {
       // Filter and sort playlist.
-      const playlistFilterSorter = new PlaylistFilterSorter()
+      const playlistFilterSorter = new PlaylistFilterSorter(histories)
 
       playlistFilterSorter.runSort(playlist).then(function (data) {
         DisplayOutput.listTracks(data, 'Tracks in queue:')

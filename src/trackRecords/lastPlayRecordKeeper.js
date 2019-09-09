@@ -31,11 +31,7 @@ class LastPlay {
    * @param {Function} cb
    */
   loadPlaybackHistory (cb) {
-    console.log('loading playback history');
-
     fs.readFile(this.hsDoc, 'utf8', function (err, data) {
-      console.log('file read');
-      console.log(JSON.parse(data));
 
       if (data) {
         this.playbackHistory = JSON.parse(data)

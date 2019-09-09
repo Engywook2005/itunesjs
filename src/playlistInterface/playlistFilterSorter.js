@@ -157,8 +157,6 @@ class PlaylistFilterSorter {
    * @returns Array
    */
   filterRecentArtistsAlbumsEtc (playList, callback) {
-    console.log('filtering recents')
-
     const self = this
 
     const recordSet = Object.keys(this.lastPlayRecords)
@@ -171,8 +169,6 @@ class PlaylistFilterSorter {
     const blacklist = []
 
     const checkAllFinished = function () {
-      console.log('checking all finished');
-
       let finished = true
 
       for (let i = 0; i < recordSet.length; i++) {
@@ -181,8 +177,6 @@ class PlaylistFilterSorter {
           break
         }
       }
-
-      console.log('finished');
 
       if (!finished) {
         return
@@ -200,11 +194,7 @@ class PlaylistFilterSorter {
     for (let i = 0; i < recordSet.length; i++) {
       const targetHistory = this.lastPlayRecords[recordSet[i]]
 
-      console.log(targetHistory);
-
       const loadedListCallback = function (caller) {
-        console.log('list has been loaded');
-
         for (let j = 0; j < playList.length; j++) {
           const lastPlay = new Date().getTime() - caller.checkLastPlayBack(playList[j][targetHistory.search])
           if (lastPlay > 0 && lastPlay < minimumTime) {

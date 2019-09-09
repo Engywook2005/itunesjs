@@ -26,7 +26,7 @@ const histories = {
   },
   'songTitle': {
     class: songTitleRecord,
-    search: 'title'
+    search: 'name'
   }
 }
 

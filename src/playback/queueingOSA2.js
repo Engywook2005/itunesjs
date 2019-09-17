@@ -53,6 +53,7 @@ class Queueing {
 
       for (let prop in knownTracks) {
         if (knownTracks[prop].databaseID() === dbID) {
+          console.log('found by database id: ' + knownTracks[prop].name())
           trackToAdd = knownTracks[prop]
           break
         }
@@ -77,23 +78,7 @@ class Queueing {
         return false
       }
 
-      const tempPlaylistTracks = tempPlaylist.tracks
-
-      let alreadyAdded = false
-
-      for(let prop in tempPlaylistTracks) {
-        if(tempPlaylistTracks[prop].databaseID() === dbID) {
-          alreadyAdded = true;
-          break;
-        }
-      }
-
-      // Duct tape when I was frustrated.. Definitely improve on this when we are making a complete playlist and not adding to
-      // it while playing.
-      if(!alreadyAdded) {
-        console.log('found by database id: ' + trackToAdd.name())
-        trackToAdd.duplicate({ to: tempPlaylist })
-      }
+      trackToAdd.duplicate({ to: tempPlaylist })
 
       if (startPlayback && Application('iTunes').playerState() !== 'playing') {
         tempPlaylist.play()

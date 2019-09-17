@@ -173,12 +173,13 @@ class PlaylistFilterSorter {
 
       for (let i = 0; i < recordSet.length; i++) {
         if (!self.lastPlayRecords[recordSet[i]].finished) {
-          return
+          finished = false
+          break
         }
       }
 
-      for (let i = 0; i < recordSet.length; i++) {
-        self.lastPlayRecords[recordSet[i]].finished = false;
+      if (!finished) {
+        return
       }
 
       for (let j = 0; j < playList.length; j++) {
@@ -203,6 +204,8 @@ class PlaylistFilterSorter {
         targetHistory.finished = true
         checkAllFinished()
       }
+
+      targetHistory.finished = false
 
       targetHistory.class.loadPlaybackHistory (function(err, caller) {
         loadedListCallback(caller)

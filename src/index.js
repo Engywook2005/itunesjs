@@ -38,10 +38,11 @@ const histories = {
  * @param {*} trackData
  */
 const trackChangeCallback = function (trackData) {
+  const histSet = Object.keys(histories),
+    histSetLength = histSet.length
+  let historiesComplete = 0
 
-  const histSet = Object.keys(histories)
-
-  for (let i = 0; i < histSet.length; i++) {
+  for (let i = 0; i < histSetLength; i++) {
     const record = histories[histSet[i]]
 
     record.class.loadPlaybackHistory(function (err, caller) {
@@ -56,7 +57,11 @@ const trackChangeCallback = function (trackData) {
           console.log('WARNING: ' + err)
         }
 
-        addTrackToPlaylist()
+        historiesComplete++
+
+        if(historiesComplete === histSetLength) {
+          addTrackToPlaylist()
+        }
       })
     })
   }

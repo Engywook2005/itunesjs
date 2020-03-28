@@ -3,18 +3,18 @@ const fs = require('fs')
 /**
  * Records and retrieves last time an artist has been played.
  */
-class LastPlayByArtist {
-  constructor () {
-    this.artistHistory = {}
-    this.hsDoc = __dirname + '/artistHistory.json' // eslint-disable-line no-path-concat
+class LastPlay {
+  constructor (fileName) {
+    this.playbackHistory = {}
+    this.hsDoc = __dirname + '/' + fileName + '.json' // eslint-disable-line no-path-concat
   }
 
-  // @TODO may be necessary to only load the artistHistory when app first loads and resave the updated
-  // version when shutting down. I am seeing that sometimes (for certain artists? System too busy? artistHistory
+  // @TODO may be necessary to only load the playbackHistory when app first loads and resave the updated
+  // version when shutting down. I am seeing that sometimes (for certain artists? System too busy? playbackHistory
   // is too long?)
   // 1. I see 'buffer' followed by a bunch of numbers output
   // 2. The same track is queued up next because:
-  // 3. Instead of the artist appearing in /artistHistory.json, I have a property called 'undefined' instead
+  // 3. Instead of the artist appearing in /playbackHistory.json, I have a property called 'undefined' instead
   // of the artist we started playing.
   // Per stackoverflow's suggested I have added an encoding to the call to fs.readFile. If that doesn't work
   // I'll probably need to do something like the above.
@@ -30,10 +30,11 @@ class LastPlayByArtist {
    *
    * @param {Function} cb
    */
-  loadArtistHistory (cb) {
+  loadPlaybackHistory (cb) {
     fs.readFile(this.hsDoc, 'utf8', function (err, data) {
+
       if (data) {
-        this.artistHistory = JSON.parse(data)
+        this.playbackHistory = JSON.parse(data)
         cb(err, this)
       }
     }.bind(this))
@@ -44,8 +45,8 @@ class LastPlayByArtist {
     *
     * @param {Function} cb
     */
-  finalizeArtistHistory (cb) {
-    fs.writeFile(this.hsDoc, JSON.stringify(this.artistHistory), {}, function (err) {
+  finalizePlaybackHistory (cb) {
+    fs.writeFile(this.hsDoc, JSON.stringify(this.playbackHistory), {}, function (err) {
       cb(err, this)
     }.bind(this))
   }
@@ -55,8 +56,8 @@ class LastPlayByArtist {
    * @param {*} name
    * @param {*} timestamp
    */
-  updateArtist (name, timestamp) {
-    this.artistHistory[name] = {
+  updatePlaybackHistory (name, timestamp) {
+    this.playbackHistory[name] = {
       'lastPlayed': timestamp
     }
   }
@@ -68,14 +69,14 @@ class LastPlayByArtist {
    *
    * @returns {Number}  -1 if never played.
    */
-  checkArtistLastPlay (name) {
+  checkLastPlayBack (name) {
     let lastPlayed = -1
-    if (this.artistHistory[name]) {
-      lastPlayed = this.artistHistory[name].lastPlayed
+    if (this.playbackHistory[name]) {
+      lastPlayed = this.playbackHistory[name].lastPlayed
     }
 
     return lastPlayed
   }
 }
 
-module.exports.LastPlayByArtist = LastPlayByArtist
+module.exports.LastPlayRecord = LastPlay

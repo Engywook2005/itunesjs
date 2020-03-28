@@ -1,14 +1,12 @@
 const DisplayOutput = require('../output').DisplayOutput
-const LastPlayByArtist = require('../artistRecords').LastPlayByArtist
 const Utils = require('../utils').Utils
 
 /**
  * Uses config to filter and sort master playlist.
  */
 class PlaylistFilterSorter {
-  constructor (sortedCallback) {
-    this.sortedCallback = sortedCallback
-    this.lastPlayByArtist = new LastPlayByArtist()
+  constructor (lastPlayRecords) {
+    this.lastPlayRecords = lastPlayRecords
   }
 
   /**
@@ -20,7 +18,7 @@ class PlaylistFilterSorter {
   runSort (playList) {
     return new Promise(function (resolve, reject) {
       // @TODO err should be first? Also handle err
-      const recentArtistCallback = function (refinedPlaylist, err) {
+      const recentArtistAlbumEtcCallback = function (refinedPlaylist, err) {
         if (err) {
           reject(err)
         };
@@ -55,7 +53,7 @@ class PlaylistFilterSorter {
 
       // Filter by artists recently played - that will shorten this list the most
       // @TODO - configurable how long to wait to play the same artist again
-      this.filterRecentArtists(playList, recentArtistCallback)
+      this.filterRecentArtistsAlbumsEtc(playList, recentArtistAlbumEtcCallback)
     }.bind(this))
   }
 
@@ -95,11 +93,10 @@ class PlaylistFilterSorter {
 
       const trackRating = (playlistItem.rating / 20).toString()
 
-      // @TODO timestamp should be a utils function
-
       const rightNow = Utils.getTimestamp()
 
-      let minimumWait = 168
+      // @TODO instead make sure only one three star track is allowed per day. The below just removes
+      let minimumWait = 1826
 
       if (rankings.hasOwnProperty(trackRating)) {
         minimumWait = rankings[trackRating]
@@ -158,33 +155,61 @@ class PlaylistFilterSorter {
    *
    * @returns Array
    */
-  filterRecentArtists (playList, callback) {
-    this.lastPlayByArtist.loadArtistHistory(function (caller) {
-      // @TODO dontPlaywithinDays should be a config
-      const refinedPlaylist = []
+  filterRecentArtistsAlbumsEtc (playList, callback) {
+    const self = this
 
-      const dontPlayWithinDays = 1
+    const recordSet = Object.keys(this.lastPlayRecords)
 
-      const minimumTime = dontPlayWithinDays * 24 * 3600 * 1000
-      let lastPlay
-      for (let i = 0; i < playList.length; i++) {
-        // @TODO Date.getTime is a utility function
-        lastPlay = new Date().getTime() - this.lastPlayByArtist.checkArtistLastPlay(playList[i].artist)
+    const refinedPlaylist = []
 
-        // @TODO - perhaps only for the web form - output time left before exluded artists are playable.
-        /*
-        if(lastPlay < minimumTime && playList[currentTrackID].Artist === "Jethro Tull") {
-          console.log(playList[i].Artist + " " + lastPlay + " " + minimumTime);
+    const dontPlayWithinDays = 1
+
+    const minimumTime = dontPlayWithinDays * 24 * 3600 * 1000
+    const blacklist = []
+
+    const checkAllFinished = function () {
+      let finished = true
+
+      for (let i = 0; i < recordSet.length; i++) {
+        if (!self.lastPlayRecords[recordSet[i]].finished) {
+          finished = false
+          break
         }
-        */
+      }
 
-        if (lastPlay < 0 || lastPlay > minimumTime) {
-          refinedPlaylist.push(playList[i])
+      if (!finished) {
+        return
+      }
+
+      for (let j = 0; j < playList.length; j++) {
+        if (blacklist.indexOf(playList[j]) < 0) {
+          refinedPlaylist.push(playList[j])
         }
       }
 
       callback(refinedPlaylist)
-    }.bind(this))
+    }
+
+    for (let i = 0; i < recordSet.length; i++) {
+      const targetHistory = this.lastPlayRecords[recordSet[i]]
+
+      const loadedListCallback = function (caller) {
+        for (let j = 0; j < playList.length; j++) {
+          const lastPlay = new Date().getTime() - caller.checkLastPlayBack(playList[j][targetHistory.search])
+          if (lastPlay > 0 && lastPlay < minimumTime) {
+            blacklist.push(playList[j])
+          }
+        }
+        targetHistory.finished = true
+        checkAllFinished()
+      }
+
+      targetHistory.finished = false
+
+      targetHistory.class.loadPlaybackHistory (function(err, caller) {
+        loadedListCallback(caller)
+      })
+    }
   }
 }
 

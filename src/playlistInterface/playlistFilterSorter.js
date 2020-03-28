@@ -93,11 +93,10 @@ class PlaylistFilterSorter {
 
       const trackRating = (playlistItem.rating / 20).toString()
 
-      // @TODO timestamp should be a utils function
-
       const rightNow = Utils.getTimestamp()
 
-      let minimumWait = 168
+      // @TODO instead make sure only one three star track is allowed per day. The below just removes
+      let minimumWait = 1826
 
       if (rankings.hasOwnProperty(trackRating)) {
         minimumWait = rankings[trackRating]

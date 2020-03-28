@@ -1,3 +1,3 @@
-const PlaybackStateResponder = require('./playbackStateResponder').PlaybackStateResponder
+const PlaybackStateResponder = require('./playbackStateResponder').PlaybackStateResponder;
 
-module.exports.PlaybackStateResponder = PlaybackStateResponder
+module.exports.PlaybackStateResponder = PlaybackStateResponder;

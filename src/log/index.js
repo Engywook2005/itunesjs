@@ -1,3 +1,3 @@
-const Logger = require('./logger').Logger
+const Logger = require('./logger').Logger;
 
-module.exports.Logger = Logger
+module.exports.Logger = Logger;

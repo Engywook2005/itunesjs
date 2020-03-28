@@ -1,5 +1,5 @@
-const SourcePlaylistReader = require('./sourcePlaylistReader').SourcePlaylistReader
-const PlaylistFilterSorter = require('./playlistFilterSorter').PlaylistFilterSorter
+const SourcePlaylistReader = require('./sourcePlaylistReader').SourcePlaylistReader;
+const PlaylistFilterSorter = require('./playlistFilterSorter').PlaylistFilterSorter;
 
-module.exports.SourcePlaylistReader = SourcePlaylistReader
-module.exports.PlaylistFilterSorter = PlaylistFilterSorter
+module.exports.SourcePlaylistReader = SourcePlaylistReader;
+module.exports.PlaylistFilterSorter = PlaylistFilterSorter;

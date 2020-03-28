@@ -1,3 +1,3 @@
-const DisplayOutput = require('./displayOutput').DisplayOutput
+const DisplayOutput = require('./displayOutput').DisplayOutput;
 
-module.exports.DisplayOutput = DisplayOutput
+module.exports.DisplayOutput = DisplayOutput;

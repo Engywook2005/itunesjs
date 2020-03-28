@@ -1,3 +1,51 @@
 {
-    "extends": "standard"
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module"
+    },
+    "env": {
+        "browser": true,
+        "es6": true
+    },
+    "rules": {
+        "block-scoped-var": "error",
+        "block-spacing": "error",
+        "brace-style": ["error", "stroustrup",
+            {
+                "allowSingleLine": true
+            }
+        ],
+        "camelcase": ["error",
+            {
+                "properties": "never",
+                "ignoreDestructuring": true
+            }
+        ],
+        "comma-dangle": ["error", "never"],
+        "curly": "error",
+        "default-case": "error",
+        "default-param-last": "error",
+        "eqeqeq": "error",
+        "indent": ["error", 4],
+        "no-control-regex": "off",
+        "no-extra-semi": "error",
+        "no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
+        "no-multi-spaces": ["error",
+            {
+                "ignoreEOLComments": false
+            }
+        ],
+        "no-prototype-builtins": "off",
+        "no-template-curly-in-string": "error",
+        "no-var": "error",
+        "prefer-const": "error",
+        "prefer-template": "error",
+        "quotes":["error", "single",{
+            "avoidEscape": true,
+            "allowTemplateLiterals": true
+        }],
+        "semi": "error",
+        "semi-style": ["error", "last"]
+    }
 }

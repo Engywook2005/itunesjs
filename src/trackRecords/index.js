@@ -1,3 +1,3 @@
-const LastPlayRecord = require('./lastPlayRecordKeeper').LastPlayRecord
+const LastPlayRecord = require('./lastPlayRecordKeeper').LastPlayRecord;
 
-module.exports.LastPlayRecord = LastPlayRecord
+module.exports.LastPlayRecord = LastPlayRecord;

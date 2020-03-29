@@ -1,3 +1,7 @@
+/* global Application */
+/* global module */
+/* global require */
+
 const osa = require('osa2');
 
 class Utils {

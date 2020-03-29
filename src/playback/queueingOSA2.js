@@ -1,3 +1,8 @@
+/* global Application */
+/* global module */
+/* global process */
+/* global require */
+
 const osa = require('osa2');
 
 class Queueing {
@@ -5,11 +10,10 @@ class Queueing {
         this.trackStack = trackStack;
     }
 
-    // @TODO via promises. Send back up to index.js.
     /**
-     * Finds next track to play from the queue and passes on to findAndAddTrack.
-     * @param {Boolean} startPlayback - If true, begin playing automatically.
-     * @param {Object} currentTrack - used to verify that the next track isn't the one that's already playing.
+     * Picks up top track from trackStack and adds to actual playlist.
+     *
+     * @returns {Array|*}
      */
     addTrack () {
         if (this.trackStack.length <= 0) {
@@ -31,13 +35,12 @@ class Queueing {
      * Receives id of selected track to add to playlist. Tells iTunes to find this track and add it to playlist.
      * Called by addTrack.
      * @param {*} dbID - ID of track iTunes should add to the playlist.
-     * @param {*} startPlayback - If true, begin playing automatically.
      */
-    findAndAddTrack (dbID, startPlayback) {
+    findAndAddTrack (dbID) {
     // @TODO An issue that most likely will require a change to OSA library: if you can't represent an argument as JSON,
     // you can't pass it in as an argument. Same goes for return values, so tracks and playlists can't be returned intact
     // from the function. This does mean that the osa call must be self-contained and that I have to repeat myself a lot.
-        const execAddTrack = osa((dbID, startPlayback) => {
+        const execAddTrack = osa((dbID) => {
             // @TODO configurable source and temp playlist names
 
             const knownPlaylists = Application('iTunes').sources['Library'].userPlaylists;
@@ -79,7 +82,7 @@ class Queueing {
 
         // @TODO handle failure outside of this class. Should findAndAddTrack should itself
         // return a promise.
-        execAddTrack(dbID, startPlayback).then(function (data) {
+        execAddTrack(dbID).then(function (data) {
             if (!data) {
                 console.log(`failure to find target track: ${ dbID}`);
                 process.exit();

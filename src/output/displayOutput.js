@@ -1,3 +1,6 @@
+/* global module */
+/* global require */
+
 const Logger = require('../log/logger').Logger;
 
 /**

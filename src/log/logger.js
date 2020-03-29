@@ -1,3 +1,5 @@
+/* global module */
+
 /**
  * Logs output to console.
  */

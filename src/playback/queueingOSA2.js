@@ -11,27 +11,20 @@ class Queueing {
      * @param {Boolean} startPlayback - If true, begin playing automatically.
      * @param {Object} currentTrack - used to verify that the next track isn't the one that's already playing.
      */
-    addTrack (startPlayback, currentTrack = null) {
+    addTrack () {
         if (this.trackStack.length <= 0) {
             return [];
         }
 
-        let nextTrack = this.trackStack.shift();
-
-        try {
-            if (currentTrack && nextTrack.dbID === currentTrack.dbID) {
-                nextTrack = this.trackStack.shift();
-            }
-        }
-        catch (err) {
-            return [];
-        }
+        const nextTrack = this.trackStack.shift();
 
         const dbID = nextTrack.trackID;
 
-        this.findAndAddTrack(dbID, startPlayback);
+        this.findAndAddTrack(dbID);
 
-        return this.trackStack;
+        console.log(`Adding next track: ${ JSON.stringify(nextTrack) }`);
+
+        return nextTrack;
     }
 
     /**
@@ -65,14 +58,14 @@ class Queueing {
             }
 
             for (const prop in knownPlaylists) {
-                if (knownPlaylists[prop].name() === 'tempUber') {
+                if (knownPlaylists[prop].name() === 'itunesJSPlaylist') {
                     tempPlaylist = knownPlaylists[prop];
                 }
             }
 
             if (!tempPlaylist) {
                 tempPlaylist = Application('iTunes').UserPlaylist().make();
-                tempPlaylist.name = 'tempUber';
+                tempPlaylist.name = 'itunesJSPlaylist';
             }
 
             if (!tempPlaylist) {
@@ -80,10 +73,6 @@ class Queueing {
             }
 
             trackToAdd.duplicate({ to: tempPlaylist });
-
-            if (startPlayback && Application('iTunes').playerState() !== 'playing') {
-                tempPlaylist.play();
-            }
 
             return true;
         });

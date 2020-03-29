@@ -1,4 +1,8 @@
+/* global module */
+/* global require */
+
 const DisplayOutput = require('../output').DisplayOutput;
+const SourcePlaylistReader = require('./sourcePlaylistReader');
 const Utils = require('../utils').Utils;
 
 /**
@@ -32,7 +36,7 @@ class PlaylistFilterSorter {
                 const numberOnShortList = 25;
 
                 // Then filter by number of stars vs how long since played
-                // @TODO - configurable how long to wait depending on number of starts
+                // @TODO - we only need to do this once, move to static function?
                 refinedPlaylist = this.filterByStars(refinedPlaylist);
 
                 // Then sort what's left by number of plays, in ascending order. Take the first 25.
@@ -162,11 +166,9 @@ class PlaylistFilterSorter {
 
         const refinedPlaylist = [];
 
-        const dontPlayWithinDays = 1;
-
-        const minimumTime = dontPlayWithinDays * 24 * 3600 * 1000;
         const blacklist = [];
 
+        // @TODO now that we are no longer using fs I'd think this is unnecessary.
         const checkAllFinished = function () {
             let finished = true;
 
@@ -187,6 +189,9 @@ class PlaylistFilterSorter {
                 }
             }
 
+            // So we don't have to keep going back to the original masterPlaylist...
+            SourcePlaylistReader.setRemainingTracks(refinedPlaylist);
+
             callback(refinedPlaylist);
         };
 
@@ -195,8 +200,7 @@ class PlaylistFilterSorter {
 
             const loadedListCallback = function (caller) {
                 for (let j = 0; j < playList.length; j++) {
-                    const lastPlay = new Date().getTime() - caller.checkLastPlayBack(playList[j][targetHistory.search]);
-                    if (lastPlay > 0 && lastPlay < minimumTime) {
+                    if (caller.checkLastPlayBack(playList[j][targetHistory.search])) {
                         blacklist.push(playList[j]);
                     }
                 }

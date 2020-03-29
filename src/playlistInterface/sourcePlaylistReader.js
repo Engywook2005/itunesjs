@@ -1,9 +1,20 @@
+/* global Application */
+/* global module */
+/* global require */
+
 const Utils = require('../utils/utils').Utils;
 const osa = require('osa2');
+
+let remainingTracks;
 
 class SourcePlaylistReader {
     static getSourcePlaylist (playlistName) {
         return new Promise((resolve, reject) => {
+            if(remainingTracks) {
+                resolve(remainingTracks);
+                return;
+            }
+
             let returnedTracks = [];
 
             const execGetSourcePlaylist = osa((descriptors, playlistName, startNumber, lengthLimit = 1000) => {
@@ -68,6 +79,10 @@ class SourcePlaylistReader {
 
             sourcePlaylistToObject();
         });
+    }
+
+    static setRemainingTracks(playlistData) {
+        remainingTracks = playlistData;
     }
 }
 

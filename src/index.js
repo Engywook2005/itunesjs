@@ -7,9 +7,9 @@ const LastPlayRecord = require('./trackRecords').LastPlayRecord;
 const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter;
 const SourcePlaylistReader = require('./playlistInterface').SourcePlaylistReader;
 const Queueing = require('./playback').Queueing;
-const artistRecord = new LastPlayRecord('artistHistoryLogging');
-const albumRecord = new LastPlayRecord('albumHistoryLogging');
-const songTitleRecord = new LastPlayRecord('songTitleHistoryLogging');
+const artistRecord = new LastPlayRecord();
+const albumRecord = new LastPlayRecord();
+const songTitleRecord = new LastPlayRecord();
 
 const histories = {
     'artist': {
@@ -37,15 +37,27 @@ const addTrackToPlaylist = function () {
             DisplayOutput.simpleMessage('Queue is empty. Exiting.', 'Queue Status');
             process.exit();
         }
-        const queueing = new Queueing(data);
-        // @TODO queueing.addTrack will return a promise, indicating number of tracks left.
-        // @TODO if paused, need to wait until playing to call queueing.addTrack. Otherwise weird things still happen when resuming.
-        queueing.addTrack(true);
+        const queueing = new Queueing(data),
+            nextTrack = queueing.addTrack();
+
+        updateHistories(nextTrack);
+        addTrackToPlaylist();
     }).catch((err) => {
         DisplayOutput.errorMessage(err);
         console.log(err);
         process.exit();
     });
+};
+
+const updateHistories = function(trackData) {
+    const histSet = Object.keys(histories),
+        histSetLength = histSet.length;
+
+    for (let i = 0; i < histSetLength; i++) {
+        const record = histories[histSet[i]];
+
+        record.class.updatePlaybackHistory(trackData[record.search]);
+    }
 };
 
 /**
@@ -67,7 +79,6 @@ const getNextTrackStack = function () {
             });
         };
 
-        // @TODO make configurable
         SourcePlaylistReader.getSourcePlaylist('masterplaylist').then((data) => {
             parseCallback(data);
         }).catch((err) => {

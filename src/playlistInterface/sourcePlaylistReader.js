@@ -88,11 +88,12 @@ class SourcePlaylistReader {
 
 module.exports.SourcePlaylistReader = SourcePlaylistReader;
 
-// @TODO remove! test use case and usage example
+// Test use case and usage example
 /*
 SourcePlaylistReader.getSourcePlaylist('masterplaylist').then((data) => {
     console.log(data);
 }).catch((err) => {
     console.log(err);
 });
-*/
+ */
+

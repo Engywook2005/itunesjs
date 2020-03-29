@@ -2,7 +2,7 @@
 /* global require */
 
 const DisplayOutput = require('../output').DisplayOutput;
-const SourcePlaylistReader = require('./sourcePlaylistReader');
+const SourcePlaylistReader = require('./sourcePlaylistReader').SourcePlaylistReader;
 const Utils = require('../utils').Utils;
 
 /**
@@ -168,8 +168,6 @@ class PlaylistFilterSorter {
 
         recordSet.forEach((recorderName) => {
             const recorder = this.lastPlayRecords[recorderName].class;
-
-            console.log(recorder);
 
             playList.forEach((playListItem) => {
                 if (recorder.checkLastPlayBack(playListItem[recorder.search])) {

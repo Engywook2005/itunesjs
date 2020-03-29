@@ -160,60 +160,34 @@ class PlaylistFilterSorter {
    * @returns Array
    */
     filterRecentArtistsAlbumsEtc (playList, callback) {
-        const self = this;
-
         const recordSet = Object.keys(this.lastPlayRecords);
 
         const refinedPlaylist = [];
 
         const blacklist = [];
 
-        // @TODO now that we are no longer using fs I'd think this is unnecessary.
-        const checkAllFinished = function () {
-            let finished = true;
+        recordSet.forEach((recorderName) => {
+            const recorder = this.lastPlayRecords[recorderName].class;
 
-            for (let i = 0; i < recordSet.length; i++) {
-                if (!self.lastPlayRecords[recordSet[i]].finished) {
-                    finished = false;
-                    break;
+            console.log(recorder);
+
+            playList.forEach((playListItem) => {
+                if (recorder.checkLastPlayBack(playListItem[recorder.search])) {
+                    blacklist.push(playListItem);
                 }
-            }
-
-            if (!finished) {
-                return;
-            }
-
-            for (let j = 0; j < playList.length; j++) {
-                if (blacklist.indexOf(playList[j]) < 0) {
-                    refinedPlaylist.push(playList[j]);
-                }
-            }
-
-            // So we don't have to keep going back to the original masterPlaylist...
-            SourcePlaylistReader.setRemainingTracks(refinedPlaylist);
-
-            callback(refinedPlaylist);
-        };
-
-        for (let i = 0; i < recordSet.length; i++) {
-            const targetHistory = this.lastPlayRecords[recordSet[i]];
-
-            const loadedListCallback = function (caller) {
-                for (let j = 0; j < playList.length; j++) {
-                    if (caller.checkLastPlayBack(playList[j][targetHistory.search])) {
-                        blacklist.push(playList[j]);
-                    }
-                }
-                targetHistory.finished = true;
-                checkAllFinished();
-            };
-
-            targetHistory.finished = false;
-
-            targetHistory.class.loadPlaybackHistory (function(err, caller) {
-                loadedListCallback(caller);
             });
-        }
+        });
+
+        playList.forEach((playListItem) => {
+            if (blacklist.indexOf(playListItem) < 0) {
+                refinedPlaylist.push(playListItem);
+            }
+        });
+
+        // So we don't have to keep going back to the original masterPlaylist...
+        SourcePlaylistReader.setRemainingTracks(refinedPlaylist);
+
+        callback(refinedPlaylist);
     }
 }
 

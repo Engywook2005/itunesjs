@@ -1,8 +1,10 @@
+/* global module*/
+
 /**
  * Records and retrieves last time an artist has been played.
  */
 class LastPlay {
-    constructor (fileName) {
+    constructor () {
         this.playbackHistory = [];
     }
 

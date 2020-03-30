@@ -167,10 +167,13 @@ class PlaylistFilterSorter {
         const blacklist = [];
 
         recordSet.forEach((recorderName) => {
-            const recorder = this.lastPlayRecords[recorderName].class;
+            const recordItem = this.lastPlayRecords[recorderName],
+                recorder = recordItem.class,
+                searchTerm = recordItem.search;
 
             playList.forEach((playListItem) => {
-                if (recorder.checkLastPlayBack(playListItem[recorder.search])) {
+                if (recorder.checkLastPlayBack(playListItem[searchTerm])) {
+
                     blacklist.push(playListItem);
                 }
             });

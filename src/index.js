@@ -41,6 +41,7 @@ const addTrackToPlaylist = function () {
             nextTrack = queueing.addTrack();
 
         updateHistories(nextTrack);
+
         addTrackToPlaylist();
     }).catch((err) => {
         DisplayOutput.errorMessage(err);

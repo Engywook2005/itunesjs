@@ -11,7 +11,6 @@ class LastPlay {
     /**
    * Sets timestamp when artist was last played. Called when beginning playback of a track.
    * @param {*} name
-   * @param {*} timestamp
    */
     updatePlaybackHistory (name) {
         this.playbackHistory.push(name);

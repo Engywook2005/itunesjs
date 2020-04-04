@@ -37,12 +37,21 @@ const addTrackToPlaylist = function () {
             DisplayOutput.simpleMessage('Queue is empty. Exiting.', 'Queue Status');
             process.exit();
         }
-        const queueing = new Queueing(data),
-            nextTrack = queueing.addTrack();
+        const queueing = new Queueing(data);
 
-        updateHistories(nextTrack);
+        queueing.addTrack()
+            .then((nextTrack) => {
 
-        addTrackToPlaylist();
+                // Don't play anything with same artist, album, or title as what we just played.
+                updateHistories(nextTrack);
+
+                // Keep going until we're out of tracks.
+                addTrackToPlaylist();
+            }).catch((err) => {
+                console.log(err);
+                process.exit();
+            });
+
     }).catch((err) => {
         DisplayOutput.errorMessage(err);
         console.log(err);

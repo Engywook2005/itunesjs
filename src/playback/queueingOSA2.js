@@ -1,6 +1,5 @@
 /* global Application */
 /* global module */
-/* global process */
 /* global require */
 
 const osa = require('osa2');
@@ -16,19 +15,23 @@ class Queueing {
      * @returns {Array|*}
      */
     addTrack () {
-        if (this.trackStack.length <= 0) {
-            return [];
-        }
+        return new Promise((resolve, reject) => {
+            if (this.trackStack.length <= 0) {
+                resolve([]);
+            }
 
-        const nextTrack = this.trackStack.shift();
+            const nextTrack = this.trackStack.shift();
 
-        const dbID = nextTrack.trackID;
+            const dbID = nextTrack.trackID;
 
-        this.findAndAddTrack(dbID);
+            this.findAndAddTrack(dbID).then(() => {
+                console.log(`Adding next track: ${JSON.stringify(nextTrack)}`);
 
-        console.log(`Adding next track: ${ JSON.stringify(nextTrack) }`);
-
-        return nextTrack;
+                resolve(nextTrack);
+            });
+        }).catch((error) => {
+            throw error;
+        });
     }
 
     /**
@@ -37,57 +40,60 @@ class Queueing {
      * @param {*} dbID - ID of track iTunes should add to the playlist.
      */
     findAndAddTrack (dbID) {
-        const execAddTrack = osa((dbID) => {
+        return new Promise((resolve, reject) => {
+            const execAddTrack = osa((dbID) => {
 
-            // @TODO configurable source and temp playlist names
-            const knownPlaylists = Application('iTunes').sources['Library'].userPlaylists;
+                // @TODO configurable source and temp playlist names
+                const knownPlaylists = Application('iTunes').sources['Library'].userPlaylists,
+                    knownTracks = knownPlaylists.byName('masterplaylist').tracks;
+                let trackToAdd, tempPlaylist;
 
-            const knownTracks = knownPlaylists.byName('masterplaylist').tracks;
-            let trackToAdd, tempPlaylist;
-
-            for (const prop in knownTracks) {
-                if (knownTracks[prop].databaseID() === dbID) {
-                    console.log(`found by database id: ${ knownTracks[prop].name()}`);
-                    trackToAdd = knownTracks[prop];
-                    break;
+                for (const prop in knownTracks) {
+                    if (knownTracks[prop].databaseID() === dbID) {
+                        console.log(`found by database id: ${ knownTracks[prop].name()}`);
+                        trackToAdd = knownTracks[prop];
+                        break;
+                    }
                 }
-            }
 
-            if (!trackToAdd) {
-                return false;
-            }
-
-            for (const prop in knownPlaylists) {
-                if (knownPlaylists[prop].name() === 'itunesJSPlaylist') {
-                    tempPlaylist = knownPlaylists[prop];
+                if (!trackToAdd) {
+                    return false;
                 }
-            }
 
-            if (!tempPlaylist) {
-                tempPlaylist = Application('iTunes').UserPlaylist().make();
-                tempPlaylist.name = 'itunesJSPlaylist';
-            }
+                for (const prop in knownPlaylists) {
+                    if (knownPlaylists[prop].name() === 'itunesJSPlaylist') {
+                        tempPlaylist = knownPlaylists[prop];
+                    }
+                }
 
-            if (!tempPlaylist) {
-                return false;
-            }
+                if (!tempPlaylist) {
+                    tempPlaylist = Application('iTunes').UserPlaylist().make();
+                    tempPlaylist.name = 'itunesJSPlaylist';
+                }
 
-            trackToAdd.duplicate({ to: tempPlaylist });
+                if (!tempPlaylist) {
+                    return false;
+                }
 
-            return true;
+                trackToAdd.duplicate({ to: tempPlaylist });
+
+                return true;
+            });
+
+            execAddTrack(dbID).then(function (data) {
+                if (!data) {
+                    reject(`failure to find target track: ${ dbID}`);
+                }
+                else {
+                    resolve(data);
+                }
+            }).catch(
+                function (error) {
+                    reject(`error: ${ error}`);
+                }
+            );
         });
 
-        execAddTrack(dbID).then(function (data) {
-            if (!data) {
-                console.log(`failure to find target track: ${ dbID}`);
-                process.exit();
-            }
-        }).catch(
-            function (error) {
-                console.log(`error: ${ error}`);
-                process.exit();
-            }
-        );
     }
 }
 

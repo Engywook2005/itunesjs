@@ -1,5 +1,6 @@
-const Queueing = require('./queueingOSA2').Queueing
-const DiscJockey = require('./discJockey').DiscJockey
+/* global module */
+/* global require */
 
-module.exports.Queueing = Queueing
-module.exports.DiscJockey = DiscJockey
+const Queueing = require('./queueingOSA2').Queueing;
+
+module.exports.Queueing = Queueing;

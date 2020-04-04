@@ -1,3 +1,6 @@
-const DisplayOutput = require('./displayOutput').DisplayOutput
+/* global module */
+/* global require */
 
-module.exports.DisplayOutput = DisplayOutput
+const DisplayOutput = require('./displayOutput').DisplayOutput;
+
+module.exports.DisplayOutput = DisplayOutput;

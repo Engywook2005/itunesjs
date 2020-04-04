@@ -1,89 +1,30 @@
-const DisplayOutput = require('./output').DisplayOutput
-const PlaybackStateResponder = require('./playbackEvents').PlaybackStateResponder
-const LastPlayRecord = require('./trackRecords').LastPlayRecord
-const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter
-const SourcePlaylistReader = require('./playlistInterface').SourcePlaylistReader
-const DiscJockey = require('./playback').DiscJockey
-const Queueing = require('./playback').Queueing
-const Utils = require('./utils').Utils
+/* global process */
+/* global module */
+/* global require */
 
-let playbackStateResponder = new PlaybackStateResponder()
-
-let currentTrack = null
-
-const artistRecord = new LastPlayRecord('artistHistoryLogging')
-const albumRecord = new LastPlayRecord('albumHistoryLogging')
-const songTitleRecord = new LastPlayRecord('songTitleHistoryLogging')
+const DisplayOutput = require('./output').DisplayOutput;
+const LastPlayRecord = require('./trackRecords').LastPlayRecord;
+const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter;
+const SourcePlaylistReader = require('./playlistInterface').SourcePlaylistReader;
+const Queueing = require('./playback').Queueing;
+const artistRecord = new LastPlayRecord();
+const albumRecord = new LastPlayRecord();
+const songTitleRecord = new LastPlayRecord();
 
 const histories = {
-  'artist': {
-    class: artistRecord,
-    search: 'artist'
-  },
-  'album': {
-    class: albumRecord,
-    search: 'album'
-  },
-  'songTitle': {
-    class: songTitleRecord,
-    search: 'name'
-  }
-}
-
-/**
- * Called when a playing event occurs and the current track is not the same as the last track
- * (meaning that the playhead has moved on to a different track and we need to add another track
- * to the playlist)
- *
- * @param {*} trackData
- */
-const trackChangeCallback = function (trackData) {
-  const histSet = Object.keys(histories),
-    histSetLength = histSet.length
-  let historiesComplete = 0
-
-  for (let i = 0; i < histSetLength; i++) {
-    const record = histories[histSet[i]]
-
-    record.class.loadPlaybackHistory(function (err, caller) {
-      if (err) {
-        console.log('WARNING: ' + err)
-      }
-      // @TODO I think it's a problem that adding the next track is a response to update artist history...
-      // If that feature doesn't work, this whole app doesn't work.
-      caller.updatePlaybackHistory(trackData[record.search], Utils.getTimestamp())
-      caller.finalizePlaybackHistory(function (err, caller) {
-        if (err) {
-          console.log('WARNING: ' + err)
-        }
-
-        historiesComplete++
-
-        if(historiesComplete === histSetLength) {
-          addTrackToPlaylist()
-        }
-      })
-    })
-  }
-}
-
-/**
- * Compares current track to last track, in response to a playing event. If a different track is
- * now playing (i.e. wasn't the user clicking resume), it's time to respond accordingly (i.e. play another track).
- *
- */
-const checkNewTrack = function () {
-  Utils.getCurrentTrack().then((data) => {
-    if (!currentTrack || (data.trackID !== currentTrack.trackID)) {
-      currentTrack = data
-      DisplayOutput.listTracks([ data ], 'Now playing')
-      trackChangeCallback(data)
+    'artist': {
+        class: artistRecord,
+        search: 'artist'
+    },
+    'album': {
+        class: albumRecord,
+        search: 'album'
+    },
+    'songTitle': {
+        class: songTitleRecord,
+        search: 'name'
     }
-  }).catch((err) => {
-    console.log(err)
-    process.exit()
-  })
-}
+};
 
 /**
  * Pulls updated queue of tracks and appends the top of the queue to the
@@ -91,31 +32,43 @@ const checkNewTrack = function () {
  *
  */
 const addTrackToPlaylist = function () {
-  getNextTrackStack().then(function (data) {
-    if (data.length === 0) {
-      DisplayOutput.simpleMessage('Queue is empty. Exiting.', 'Queue Status')
-      process.exit()
-    }
-    const queueing = new Queueing(data)
-    // @TODO queueing.addTrack will return a promise, indicating number of tracks left.
-    // @TODO if paused, need to wait until playing to call queueing.addTrack. Otherwise weird things still happen when resuming.
-    queueing.addTrack(true)
-  }).catch((err) => {
-    DisplayOutput.errorMessage(err)
-    console.log(err)
-    process.exit()
-  })
-}
+    getNextTrackStack().then(function (data) {
+        if (data.length === 0) {
+            DisplayOutput.simpleMessage('Queue is empty. Exiting.', 'Queue Status');
+            process.exit();
+        }
+        const queueing = new Queueing(data);
 
-/**
- * Response to stop event. Call to playLastTrack triggers the playing event, and its responders.
- * In this usage, the playback event triggers a refresh of the queue and adding the top of the new queue
- * to the end of the target playlist.
- */
-const trackEndedCallback = function () {
-  // @TODO configurable playlist name
-  DiscJockey.playLastTrack('tempUber')
-}
+        queueing.addTrack()
+            .then((nextTrack) => {
+
+                // Don't play anything with same artist, album, or title as what we just played.
+                updateHistories(nextTrack);
+
+                // Keep going until we're out of tracks.
+                addTrackToPlaylist();
+            }).catch((err) => {
+                console.log(err);
+                process.exit();
+            });
+
+    }).catch((err) => {
+        DisplayOutput.errorMessage(err);
+        console.log(err);
+        process.exit();
+    });
+};
+
+const updateHistories = function(trackData) {
+    const histSet = Object.keys(histories),
+        histSetLength = histSet.length;
+
+    for (let i = 0; i < histSetLength; i++) {
+        const record = histories[histSet[i]];
+
+        record.class.updatePlaybackHistory(trackData[record.search]);
+    }
+};
 
 /**
  * Assembles next tracks to play in desired order.
@@ -123,50 +76,35 @@ const trackEndedCallback = function () {
  * @returns Promise
  */
 const getNextTrackStack = function () {
-  return new Promise(function (resolve, reject) {
-    const parseCallback = function (playlist) {
-      // Filter and sort playlist.
-      const playlistFilterSorter = new PlaylistFilterSorter(histories)
+    return new Promise(function (resolve, reject) {
+        const parseCallback = function (playlist) {
+            // Filter and sort playlist.
+            const playlistFilterSorter = new PlaylistFilterSorter(histories);
 
-      playlistFilterSorter.runSort(playlist).then(function (data) {
-        DisplayOutput.listTracks(data, 'Tracks in queue:')
-        resolve(data)
-      }).catch((err) => {
-        reject(err)
-      })
-    }
+            playlistFilterSorter.runSort(playlist).then(function (data) {
+                DisplayOutput.listTracks(data, 'Tracks in queue:');
+                resolve(data);
+            }).catch((err) => {
+                reject(err);
+            });
+        };
 
-    // @TODO make configurable
-    SourcePlaylistReader.getSourcePlaylist('masterplaylist').then((data) => {
-      parseCallback(data)
-    }).catch((err) => {
-      reject(err)
-    })
-  })
-}
+        SourcePlaylistReader.getSourcePlaylist('masterplaylist').then((data) => {
+            parseCallback(data);
+        }).catch((err) => {
+            reject(err);
+        });
+    });
+};
 
 /**
  * Initializes playback event capture (listening for change in track).
  *
  */
 const init = function () {
-  playbackStateResponder.setPlaybackStateResponse('playing', () => {
-    playbackStateResponder.setPlaybackStateResponse('stopped', () => {
-      // @TODO check on whether playlist still exists. If it doesn't, handle gracefully.
-      trackEndedCallback()
-    })
-    checkNewTrack()
-  })
+    console.log('init');
 
-  // playing event will trigger after addTrackToPlaylist, kicking off cycle.
-  playbackStateResponder.startListener()
+    addTrackToPlaylist();
+};
 
-  // Since we're not playing, this call will cause the app to:
-  // 1. Generate a queue
-  // 2. Create the target playlist
-  // 3. Add the first track in the queue to the playlist
-  // 4. Play that track in the playlist.
-  addTrackToPlaylist()
-}
-
-module.exports.init = init
+module.exports.init = init;

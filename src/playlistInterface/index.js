@@ -1,5 +1,9 @@
-const SourcePlaylistReader = require('./sourcePlaylistReader').SourcePlaylistReader
-const PlaylistFilterSorter = require('./playlistFilterSorter').PlaylistFilterSorter
+/* global module */
+/* global require */
 
-module.exports.SourcePlaylistReader = SourcePlaylistReader
-module.exports.PlaylistFilterSorter = PlaylistFilterSorter
+// @FIXME just plain weird that it has to be done this way.
+const SourcePlaylistReader = require('./sourcePlaylistReader').SourcePlaylistReader;
+const PlaylistFilterSorter = require('./playlistFilterSorter').PlaylistFilterSorter;
+
+module.exports.SourcePlaylistReader = SourcePlaylistReader;
+module.exports.PlaylistFilterSorter = PlaylistFilterSorter;

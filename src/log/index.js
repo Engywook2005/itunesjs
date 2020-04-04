@@ -1,3 +1,6 @@
-const Logger = require('./logger').Logger
+/* global module */
+/* global require */
 
-module.exports.Logger = Logger
+const Logger = require('./logger').Logger;
+
+module.exports.Logger = Logger;

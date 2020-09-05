@@ -19,7 +19,7 @@ class SourcePlaylistReader {
 
             const execGetSourcePlaylist = osa((descriptors, playlistName, startNumber, lengthLimit = 1000) => {
                 // @TODO - Boilerplate code, wish I only needed to do this once
-                const knownPlaylists = Application('iTunes').sources['Library'].userPlaylists;
+                const knownPlaylists = Application('Music').sources['Library'].userPlaylists;
 
                 const targetPlaylist = knownPlaylists.byName(playlistName);
 

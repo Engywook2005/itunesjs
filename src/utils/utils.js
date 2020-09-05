@@ -30,7 +30,7 @@ class Utils {
     static getCurrentTrack () {
         return new Promise((resolve, reject) => {
             const listCurrentTrack = osa(function (descriptors) {
-                const track = Application('iTunes').currentTrack();
+                const track = Application('Music').currentTrack();
 
                 const trackDescription = {};
 

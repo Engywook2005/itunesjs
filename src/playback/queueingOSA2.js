@@ -44,7 +44,7 @@ class Queueing {
             const execAddTrack = osa((dbID) => {
 
                 // @TODO configurable source and temp playlist names
-                const knownPlaylists = Application('iTunes').sources['Library'].userPlaylists,
+                const knownPlaylists = Application('Music').sources['Library'].userPlaylists,
                     knownTracks = knownPlaylists.byName('masterplaylist').tracks;
                 let trackToAdd, tempPlaylist;
 
@@ -67,7 +67,7 @@ class Queueing {
                 }
 
                 if (!tempPlaylist) {
-                    tempPlaylist = Application('iTunes').UserPlaylist().make();
+                    tempPlaylist = Application('Music').UserPlaylist().make();
                     tempPlaylist.name = 'itunesJSPlaylist';
                 }
 

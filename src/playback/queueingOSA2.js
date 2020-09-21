@@ -15,7 +15,7 @@ class Queueing {
      * @returns {Array|*}
      */
     addTrack () {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if (this.trackStack.length <= 0) {
                 resolve([]);
             }

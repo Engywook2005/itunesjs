@@ -41,7 +41,9 @@ class PlaylistFilterSorter {
 
                 // Then sort what's left by number of plays, in ascending order. Take the first 25.
                 // @TODO - configurable how many tracks to take. The reason for doing this is a little hard to explain.
-                refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'playCount');
+                // @TODO configurable as to whether to use playcount at all. In my case this has had the opposite of the desired 
+                // effect in that I'd be listing to only the newer albums for months or even years.
+                // refinedPlaylist = this.sortPlaylist(refinedPlaylist, 'playCount');
 
                 this.logTimeRemaining(refinedPlaylist);
 

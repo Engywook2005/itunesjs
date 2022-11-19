@@ -13,8 +13,6 @@ const artistRecord = new LastPlayRecord();
 const albumRecord = new LastPlayRecord();
 const songTitleRecord = new LastPlayRecord();
 
-// test change again
-
 const histories = {
   artist: {
     class: artistRecord,
@@ -46,19 +44,19 @@ const addTrackToPlaylist = function () {
 
       queueing
         .addTrack()
-        .then((nextTrack) => {
+        .then(nextTrack => {
           // Don't play anything with same artist, album, or title as what we just played.
           updateHistories(nextTrack);
 
           // Keep going until we're out of tracks.
           addTrackToPlaylist();
         })
-        .catch((err) => {
+        .catch(err => {
           console.log(err);
           process.exit();
         });
     })
-    .catch((err) => {
+    .catch(err => {
       DisplayOutput.errorMessage(err);
       console.log(err);
       process.exit();
@@ -93,16 +91,16 @@ const getNextTrackStack = function () {
           DisplayOutput.listTracks(data, 'Tracks in queue:');
           resolve(data);
         })
-        .catch((err) => {
+        .catch(err => {
           reject(err);
         });
     };
 
     SourcePlaylistReader.getSourcePlaylist('masterplaylist')
-      .then((data) => {
+      .then(data => {
         parseCallback(data);
       })
-      .catch((err) => {
+      .catch(err => {
         reject(err);
       });
   });

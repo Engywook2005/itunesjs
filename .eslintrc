@@ -27,7 +27,7 @@
         "default-case": "error",
         "default-param-last": "error",
         "eqeqeq": "error",
-        "indent": ["error", 4],
+        "indent": ["error", 2],
         "no-control-regex": "off",
         "no-extra-semi": "error",
         "no-mixed-spaces-and-tabs": ["error", "smart-tabs"],

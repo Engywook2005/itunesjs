@@ -4,26 +4,30 @@
 
 const DisplayOutput = require('./output').DisplayOutput;
 const LastPlayRecord = require('./trackRecords').LastPlayRecord;
-const PlaylistFilterSorter = require('./playlistInterface').PlaylistFilterSorter;
-const SourcePlaylistReader = require('./playlistInterface').SourcePlaylistReader;
+const PlaylistFilterSorter =
+  require('./playlistInterface').PlaylistFilterSorter;
+const SourcePlaylistReader =
+  require('./playlistInterface').SourcePlaylistReader;
 const Queueing = require('./playback').Queueing;
 const artistRecord = new LastPlayRecord();
 const albumRecord = new LastPlayRecord();
 const songTitleRecord = new LastPlayRecord();
 
+// test change
+
 const histories = {
-    'artist': {
-        class: artistRecord,
-        search: 'artist'
-    },
-    'album': {
-        class: albumRecord,
-        search: 'album'
-    },
-    'songTitle': {
-        class: songTitleRecord,
-        search: 'name'
-    }
+  artist: {
+    class: artistRecord,
+    search: 'artist'
+  },
+  album: {
+    class: albumRecord,
+    search: 'album'
+  },
+  songTitle: {
+    class: songTitleRecord,
+    search: 'name'
+  }
 };
 
 /**
@@ -32,42 +36,44 @@ const histories = {
  *
  */
 const addTrackToPlaylist = function () {
-    getNextTrackStack().then(function (data) {
-        if (data.length === 0) {
-            DisplayOutput.simpleMessage('Queue is empty. Exiting.', 'Queue Status');
-            process.exit();
-        }
-        const queueing = new Queueing(data);
-
-        queueing.addTrack()
-            .then((nextTrack) => {
-
-                // Don't play anything with same artist, album, or title as what we just played.
-                updateHistories(nextTrack);
-
-                // Keep going until we're out of tracks.
-                addTrackToPlaylist();
-            }).catch((err) => {
-                console.log(err);
-                process.exit();
-            });
-
-    }).catch((err) => {
-        DisplayOutput.errorMessage(err);
-        console.log(err);
+  getNextTrackStack()
+    .then(function (data) {
+      if (data.length === 0) {
+        DisplayOutput.simpleMessage('Queue is empty. Exiting.', 'Queue Status');
         process.exit();
+      }
+      const queueing = new Queueing(data);
+
+      queueing
+        .addTrack()
+        .then((nextTrack) => {
+          // Don't play anything with same artist, album, or title as what we just played.
+          updateHistories(nextTrack);
+
+          // Keep going until we're out of tracks.
+          addTrackToPlaylist();
+        })
+        .catch((err) => {
+          console.log(err);
+          process.exit();
+        });
+    })
+    .catch((err) => {
+      DisplayOutput.errorMessage(err);
+      console.log(err);
+      process.exit();
     });
 };
 
-const updateHistories = function(trackData) {
-    const histSet = Object.keys(histories),
-        histSetLength = histSet.length;
+const updateHistories = function (trackData) {
+  const histSet = Object.keys(histories),
+    histSetLength = histSet.length;
 
-    for (let i = 0; i < histSetLength; i++) {
-        const record = histories[histSet[i]];
+  for (let i = 0; i < histSetLength; i++) {
+    const record = histories[histSet[i]];
 
-        record.class.updatePlaybackHistory(trackData[record.search]);
-    }
+    record.class.updatePlaybackHistory(trackData[record.search]);
+  }
 };
 
 /**
@@ -76,25 +82,30 @@ const updateHistories = function(trackData) {
  * @returns Promise
  */
 const getNextTrackStack = function () {
-    return new Promise(function (resolve, reject) {
-        const parseCallback = function (playlist) {
-            // Filter and sort playlist.
-            const playlistFilterSorter = new PlaylistFilterSorter(histories);
+  return new Promise(function (resolve, reject) {
+    const parseCallback = function (playlist) {
+      // Filter and sort playlist.
+      const playlistFilterSorter = new PlaylistFilterSorter(histories);
 
-            playlistFilterSorter.runSort(playlist).then(function (data) {
-                DisplayOutput.listTracks(data, 'Tracks in queue:');
-                resolve(data);
-            }).catch((err) => {
-                reject(err);
-            });
-        };
-
-        SourcePlaylistReader.getSourcePlaylist('masterplaylist').then((data) => {
-            parseCallback(data);
-        }).catch((err) => {
-            reject(err);
+      playlistFilterSorter
+        .runSort(playlist)
+        .then(function (data) {
+          DisplayOutput.listTracks(data, 'Tracks in queue:');
+          resolve(data);
+        })
+        .catch((err) => {
+          reject(err);
         });
-    });
+    };
+
+    SourcePlaylistReader.getSourcePlaylist('masterplaylist')
+      .then((data) => {
+        parseCallback(data);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
 };
 
 /**
@@ -102,9 +113,9 @@ const getNextTrackStack = function () {
  *
  */
 const init = function () {
-    console.log('init');
+  console.log('init');
 
-    addTrackToPlaylist();
+  addTrackToPlaylist();
 };
 
 module.exports.init = init;
